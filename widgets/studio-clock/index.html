@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 12px 16px;
+    overflow: hidden;
+  }
+  .widget { display: flex; flex-direction: column; gap: 2px; }
+  .greeting {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: #b08a7a;
+    letter-spacing: 0.02em;
+    opacity: 0.9;
+  }
+  .date-line {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: #3d3530;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .meta-line { display: flex; align-items: center; gap: 10px; margin-top: 3px; }
+  .time {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 300;
+    color: #8a7060;
+    letter-spacing: 0.08em;
+  }
+  .pulse { animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="greeting" id="greeting">good morning</div>
+  <div class="date-line" id="date">Monday, March 30th, 2026</div>
+  <div class="meta-line">
+    <span class="time" id="time">12<span class="pulse">:</span>00 pm</span>
+  </div>
+</div>
+<script>
+  function ordinal(n) {
+    const s = ['th','st','nd','rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+  function getGreeting(h) {
+    if (h >= 5 && h < 12) return 'good morning \u2600\ufe0f';
+    if (h >= 12 && h < 17) return 'good afternoon \ud83c\udf3f';
+    if (h >= 17 && h < 21) return 'good evening \ud83c\udf19';
+    return 'bonne nuit \ud83d\udd6f\ufe0f';
+  }
+  function update() {
+    const now = new Date();
+    const h = now.getHours();
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const ampm = h >= 12 ? 'pm' : 'am';
+    const h12 = h % 12 || 12;
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('greeting').textContent = getGreeting(h);
+    document.getElementById('date').textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + ordinal(now.getDate()) + ', ' + now.getFullYear();
+    document.getElementById('time').innerHTML = h12 + '<span class="pulse">:</span>' + m + ' ' + ampm;
+  }
+  update();
+  setInterval(update, 1000);
+</script>
+</body>
+</html>
