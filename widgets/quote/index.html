@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quote Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; overflow: hidden; }
+  body {
+    font-family: 'DM Mono', monospace;
+    padding: 10px 16px 12px;
+  }
+  .quote {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .quote::before { content: '\201C'; }
+  .quote::after  { content: '\201D'; }
+  .author {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .tag {
+    display: inline-block;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tag);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="quote" id="quote"></div>
+<div class="author" id="author"></div>
+<div class="tag" id="tag"></div>
+
+<script>
+  function setTheme() {
+    try {
+      const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.body.style.background = dark ? '#191919' : '#ffffff';
+      document.documentElement.style.setProperty('--text', dark ? '#d8cfc6' : '#2a2218');
+      document.documentElement.style.setProperty('--muted', dark ? '#6a5a50' : '#9e8e82');
+      document.documentElement.style.setProperty('--tag', dark ? '#7a6a5a' : '#b0a090');
+    } catch(e) {}
+  }
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addListener(setTheme);
+  setTheme();
+
+  const quotes = [
+    // poetry & literature
+    { q: "I am not afraid of storms, for I am learning how to sail my ship.", a: "Louisa May Alcott", t: "literature" },
+    { q: "There is no greater agony than bearing an untold story inside you.", a: "Maya Angelou", t: "literature" },
+    { q: "You only are free when you realize you belong no place — you belong every place — no place at all.", a: "Maya Angelou", t: "literature" },
+    { q: "I took a deep breath and listened to the old brag of my heart: I am, I am, I am.", a: "Sylvia Plath", t: "poetry" },
+    { q: "Tell me, what is it you plan to do with your one wild and precious life?", a: "Mary Oliver", t: "poetry" },
+    { q: "Instructions for living a life: Pay attention. Be astonished. Tell about it.", a: "Mary Oliver", t: "poetry" },
+    { q: "You do not have to be good. You do not have to walk on your knees for a hundred miles through the desert repenting.", a: "Mary Oliver", t: "poetry" },
+    { q: "She is too fond of books, and it has turned her brain.", a: "Louisa May Alcott", t: "literature" },
+    { q: "I am not a writer except when I write.", a: "Juan Carlos Onetti", t: "literature" },
+    { q: "We read to know we are not alone.", a: "C.S. Lewis", t: "literature" },
+    { q: "A word after a word after a word is power.", a: "Margaret Atwood", t: "poetry" },
+    { q: "Poetry is when an emotion has found its thought and the thought has found words.", a: "Robert Frost", t: "poetry" },
+    { q: "If you feel the urge, don't be afraid to go on a wild goose chase. What do you think wild geese are for anyway?", a: "Mary Oliver", t: "poetry" },
+    { q: "The most regretful people on earth are those who felt the call to creative work, who felt their own creative power restive and uprising, and gave to it neither power nor time.", a: "Mary Oliver", t: "poetry" },
+    // creativity & art
+    { q: "Creativity is intelligence having fun.", a: "Albert Einstein", t: "creativity" },
+    { q: "Art enables us to find ourselves and lose ourselves at the same time.", a: "Thomas Merton", t: "art" },
+    { q: "The world always seems brighter when you've just made something that wasn't there before.", a: "Neil Gaiman", t: "creativity" },
+    { q: "You can't use up creativity. The more you use, the more you have.", a: "Maya Angelou", t: "creativity" },
+    { q: "Every artist dips their brush in their own soul and paints their own nature into their pictures.", a: "Henry Ward Beecher", t: "art" },
+    { q: "An empty canvas is full.", a: "Robert Rauschenberg", t: "art" },
+    { q: "Art is not what you see, but what you make others see.", a: "Edgar Degas", t: "art" },
+    { q: "The job of the artist is always to deepen the mystery.", a: "Francis Bacon", t: "art" },
+    { q: "Making things is the most important thing. Not planning to make things.", a: "Austin Kleon", t: "creativity" },
+    { q: "You have to be willing to be embarrassed by your early work.", a: "Austin Kleon", t: "creativity" },
+    { q: "Steal like an artist.", a: "Austin Kleon", t: "creativity" },
+    { q: "Every child is an artist. The problem is staying an artist when you grow up.", a: "Pablo Picasso", t: "art" },
+    // life & philosophy
+    { q: "The present moment always will have been.", a: "Simone de Beauvoir", t: "philosophy" },
+    { q: "One is not born, but rather becomes, a woman.", a: "Simone de Beauvoir", t: "philosophy" },
+    { q: "In the middle of difficulty lies opportunity.", a: "Albert Einstein", t: "life" },
+    { q: "The most common form of despair is not being who you are.", a: "S\u00f8ren Kierkegaard", t: "philosophy" },
+    { q: "Do what you can, with what you have, where you are.", a: "Theodore Roosevelt", t: "life" },
+    { q: "Simplicity is the ultimate sophistication.", a: "Leonardo da Vinci", t: "life" },
+    { q: "It always seems impossible until it is done.", a: "Nelson Mandela", t: "life" },
+    { q: "The secret of getting ahead is getting started.", a: "Mark Twain", t: "life" },
+    { q: "To live is the rarest thing in the world. Most people just exist.", a: "Oscar Wilde", t: "life" },
+    { q: "Be yourself; everyone else is already taken.", a: "Oscar Wilde", t: "life" },
+    { q: "We are what we repeatedly do. Excellence is not an act, but a habit.", a: "Aristotle", t: "philosophy" },
+    { q: "The unexamined life is not worth living.", a: "Socrates", t: "philosophy" },
+    { q: "In order to be irreplaceable, one must always be different.", a: "Coco Chanel", t: "life" },
+    { q: "The most courageous act is still to think for yourself. Aloud.", a: "Coco Chanel", t: "life" },
+    { q: "Not all those who wander are lost.", a: "J.R.R. Tolkien", t: "literature" },
+    // motherhood & family
+    { q: "Motherhood: all love begins and ends there.", a: "Robert Browning", t: "motherhood" },
+    { q: "A mother's love for her child is like nothing else in the world.", a: "Agatha Christie", t: "motherhood" },
+    { q: "Biology is the least of what makes someone a mother.", a: "Oprah Winfrey", t: "motherhood" },
+    { q: "The natural state of motherhood is unselfishness.", a: "Jessica Lange", t: "motherhood" },
+    { q: "You are the closest I will ever come to magic.", a: "Suzanne Finnamore", t: "motherhood" },
+    { q: "There is no way to be a perfect mother, and a million ways to be a good one.", a: "Jill Churchill", t: "motherhood" },
+    { q: "Making the decision to have a child is momentous. It is to decide forever to have your heart go walking outside your body.", a: "Elizabeth Stone", t: "motherhood" },
+    { q: "A child can teach an adult three things: to be happy for no reason, to always be curious, and to fight tirelessly for something.", a: "Paulo Coelho", t: "motherhood" },
+    { q: "In family life, love is the oil that eases friction, the cement that binds closer together.", a: "Friedrich Nietzsche", t: "family" },
+    { q: "Family is not an important thing. It's everything.", a: "Michael J. Fox", t: "family" },
+  ];
+
+  function getDailyQuote() {
+    // seed by day so it changes daily but stays fixed within the day
+    const now = new Date();
+    const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+    const index = seed % quotes.length;
+    return quotes[index];
+  }
+
+  function render() {
+    const { q, a, t } = getDailyQuote();
+    document.getElementById('quote').textContent = q;
+    document.getElementById('author').textContent = '\u2014 ' + a;
+    document.getElementById('tag').textContent = t;
+  }
+
+  render();
+
+  // refresh at midnight
+  const now = new Date();
+  const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
+  setTimeout(() => { render(); setInterval(render, 24 * 60 * 60 * 1000); }, msToMidnight);
+</script>
+</body>
+</html>
