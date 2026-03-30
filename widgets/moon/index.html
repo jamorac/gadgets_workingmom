@@ -11,18 +11,17 @@
   body { font-family: 'DM Mono', monospace; padding: 10px 14px; }
 
   .widget { display: flex; flex-direction: column; gap: 8px; }
-
   .row { display: flex; gap: 0; }
 
   .day {
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 4px;
     padding: 6px 4px;
   }
-  .day + .day { border-left: 0.5px solid var(--border); }
+  .day + .day { border-left: 0.5px solid var(--border); padding-left: 10px; }
 
   .day-label {
     font-size: 9px;
@@ -30,21 +29,15 @@
     text-transform: uppercase;
     color: var(--muted);
   }
-
-  .moon-face {
-    width: 36px;
-    height: 36px;
-  }
-
+  .moon-face { width: 36px; height: 36px; }
   .phase-name {
     font-family: 'DM Serif Display', serif;
     font-style: italic;
     font-size: 11px;
     color: var(--sub);
-    text-align: center;
+    text-align: left;
     line-height: 1.2;
   }
-
   .illumination {
     font-size: 9px;
     color: var(--muted);
@@ -56,7 +49,6 @@
 <div class="widget">
   <div class="row" id="moon-row"></div>
 </div>
-
 <script>
   function setTheme() {
     try {
@@ -74,76 +66,54 @@
   if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addListener(setTheme);
   setTheme();
 
-  // Moon phase calculation — no API needed
   function getMoonPhase(date) {
-    // Known new moon reference: Jan 6 2000
     const known = new Date(2000, 0, 6, 18, 14, 0);
-    const synodic = 29.530588853; // days
+    const synodic = 29.530588853;
     const diff = (date - known) / (1000 * 60 * 60 * 24);
     let age = diff % synodic;
     if (age < 0) age += synodic;
     const illumination = Math.round((1 - Math.cos((age / synodic) * 2 * Math.PI)) / 2 * 100);
-
     let name, svgPhase;
     const p = age / synodic;
-
     if (p < 0.025 || p >= 0.975)      { name = 'New Moon';        svgPhase = 'new'; }
-    else if (p < 0.25)                  { name = 'Waxing Crescent'; svgPhase = 'waxing-crescent'; }
-    else if (p < 0.275)                 { name = 'First Quarter';   svgPhase = 'first-quarter'; }
-    else if (p < 0.475)                 { name = 'Waxing Gibbous';  svgPhase = 'waxing-gibbous'; }
-    else if (p < 0.525)                 { name = 'Full Moon';       svgPhase = 'full'; }
-    else if (p < 0.725)                 { name = 'Waning Gibbous';  svgPhase = 'waning-gibbous'; }
-    else if (p < 0.775)                 { name = 'Last Quarter';    svgPhase = 'last-quarter'; }
-    else                                { name = 'Waning Crescent'; svgPhase = 'waning-crescent'; }
-
+    else if (p < 0.25)                { name = 'Waxing Crescent'; svgPhase = 'waxing-crescent'; }
+    else if (p < 0.275)               { name = 'First Quarter';   svgPhase = 'first-quarter'; }
+    else if (p < 0.475)               { name = 'Waxing Gibbous';  svgPhase = 'waxing-gibbous'; }
+    else if (p < 0.525)               { name = 'Full Moon';       svgPhase = 'full'; }
+    else if (p < 0.725)               { name = 'Waning Gibbous';  svgPhase = 'waning-gibbous'; }
+    else if (p < 0.775)               { name = 'Last Quarter';    svgPhase = 'last-quarter'; }
+    else                              { name = 'Waning Crescent'; svgPhase = 'waning-crescent'; }
     return { name, illumination, svgPhase, age };
   }
 
   function moonSVG(phase) {
-    const size = 36;
-    const r = 14;
-    const cx = 18;
-    const cy = 18;
-    const lit = 'var(--moon-lit)';
-    const dark = 'var(--moon-dark)';
-    const bg = 'var(--moon-bg)';
-
-    // Helper: draw the moon face as SVG
-    // We use a clip approach: full circle, then overlay shadow ellipse
+    const size = 36, r = 14, cx = 18, cy = 18;
+    const lit = 'var(--moon-lit)', dark = 'var(--moon-dark)', bg = 'var(--moon-bg)';
     let svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">`;
     svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${bg}" />`;
-
     if (phase === 'new') {
       svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${dark}" opacity="0.85"/>`;
     } else if (phase === 'full') {
       svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${lit}"/>`;
     } else if (phase === 'first-quarter') {
-      // right half lit
       svg += `<path d="M${cx},${cy-r} A${r},${r} 0 0,1 ${cx},${cy+r} L${cx},${cy-r}" fill="${lit}"/>`;
       svg += `<path d="M${cx},${cy-r} A${r},${r} 0 0,0 ${cx},${cy+r} L${cx},${cy-r}" fill="${dark}" opacity="0.85"/>`;
     } else if (phase === 'last-quarter') {
-      // left half lit
       svg += `<path d="M${cx},${cy-r} A${r},${r} 0 0,0 ${cx},${cy+r} L${cx},${cy-r}" fill="${lit}"/>`;
       svg += `<path d="M${cx},${cy-r} A${r},${r} 0 0,1 ${cx},${cy+r} L${cx},${cy-r}" fill="${dark}" opacity="0.85"/>`;
     } else if (phase === 'waxing-crescent') {
       svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${dark}" opacity="0.85"/>`;
-      // small crescent on right
       svg += `<path d="M${cx},${cy-r} A${r},${r} 0 0,1 ${cx},${cy+r} A${r*0.5},${r} 0 0,0 ${cx},${cy-r}" fill="${lit}"/>`;
     } else if (phase === 'waxing-gibbous') {
       svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${lit}"/>`;
-      // shadow on left
       svg += `<path d="M${cx},${cy-r} A${r},${r} 0 0,0 ${cx},${cy+r} A${r*0.5},${r} 0 0,1 ${cx},${cy-r}" fill="${dark}" opacity="0.85"/>`;
     } else if (phase === 'waning-gibbous') {
       svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${lit}"/>`;
-      // shadow on right
       svg += `<path d="M${cx},${cy-r} A${r},${r} 0 0,1 ${cx},${cy+r} A${r*0.5},${r} 0 0,0 ${cx},${cy-r}" fill="${dark}" opacity="0.85"/>`;
     } else if (phase === 'waning-crescent') {
       svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${dark}" opacity="0.85"/>`;
-      // small crescent on left
       svg += `<path d="M${cx},${cy-r} A${r},${r} 0 0,0 ${cx},${cy+r} A${r*0.5},${r} 0 0,1 ${cx},${cy-r}" fill="${lit}"/>`;
     }
-
-    // subtle rim
     svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="0.5"/>`;
     svg += `</svg>`;
     return svg;
@@ -164,7 +134,6 @@
       const date = new Date();
       date.setDate(date.getDate() + i);
       const { name, illumination, svgPhase } = getMoonPhase(date);
-
       const div = document.createElement('div');
       div.className = 'day';
       div.innerHTML = `
@@ -178,7 +147,6 @@
   }
 
   render();
-  // refresh at midnight
   const now = new Date();
   const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
   setTimeout(() => { render(); setInterval(render, 24 * 60 * 60 * 1000); }, msToMidnight);
