@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Mono', monospace;
+    padding: 0;
+    overflow: hidden;
+  }
+  .widget { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+
+  /* current */
+  .current { display: flex; align-items: flex-start; gap: 12px; }
+  .icon { font-size: 32px; line-height: 1; }
+  .current-info { display: flex; flex-direction: column; gap: 1px; }
+  .temp-main {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--text);
+  }
+  .feels { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; }
+  .condition { font-size: 11px; color: var(--sub); letter-spacing: 0.04em; margin-top: 2px; }
+
+  /* divider */
+  .divider { height: 0.5px; background: var(--border); }
+
+  /* today / tomorrow row */
+  .forecast { display: flex; gap: 0; }
+  .forecast-day { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 4px 0; }
+  .forecast-day + .forecast-day { border-left: 0.5px solid var(--border); padding-left: 12px; }
+  .day-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .day-temp { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--text); }
+  .day-range { font-size: 9px; color: var(--muted); }
+  .day-icon { font-size: 14px; margin-bottom: 1px; }
+  .rain { font-size: 9px; color: var(--rain); letter-spacing: 0.04em; margin-top: 1px; }
+
+  .loading { font-size: 11px; color: var(--muted); padding: 10px 14px; }
+  .error { font-size: 10px; color: var(--muted); padding: 10px 14px; }
+</style>
+</head>
+<body>
+<div class="loading" id="loading">fetching weather…</div>
+<div class="widget" id="widget" style="display:none">
+  <div class="current">
+    <div class="icon" id="icon-now">☀️</div>
+    <div class="current-info">
+      <div class="temp-main" id="temp-now">--°</div>
+      <div class="feels" id="feels">feels like --°</div>
+      <div class="condition" id="condition-now">--</div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="forecast">
+    <div class="forecast-day">
+      <div class="day-label">today</div>
+      <div class="day-icon" id="icon-today">☀️</div>
+      <div class="day-temp" id="temp-today">--°</div>
+      <div class="day-range" id="range-today">H -- / L --</div>
+      <div class="rain" id="rain-today">💧 --%</div>
+    </div>
+    <div class="forecast-day">
+      <div class="day-label">tomorrow</div>
+      <div class="day-icon" id="icon-tomorrow">☀️</div>
+      <div class="day-temp" id="temp-tomorrow">--°</div>
+      <div class="day-range" id="range-tomorrow">H -- / L --</div>
+      <div class="rain" id="rain-tomorrow">💧 --%</div>
+    </div>
+  </div>
+</div>
+<div class="error" id="error" style="display:none">couldn’t load weather</div>
+
+<script>
+  // Paris 12ème coordinates
+  const LAT = 48.8472;
+  const LON = 2.3896;
+
+  function setTheme() {
+    try {
+      const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.body.style.background = dark ? '#191919' : '#ffffff';
+      document.documentElement.style.setProperty('--text', dark ? '#e8e0d8' : '#2a2218');
+      document.documentElement.style.setProperty('--sub', dark ? '#a09080' : '#6b5a4e');
+      document.documentElement.style.setProperty('--muted', dark ? '#6a5a50' : '#9e8e82');
+      document.documentElement.style.setProperty('--border', dark ? '#333' : '#e0d8d0');
+      document.documentElement.style.setProperty('--rain', dark ? '#7ab8d4' : '#4a8fa8');
+    } catch(e) {}
+  }
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addListener(setTheme);
+  setTheme();
+
+  const CONDITIONS = {
+    0: ['Clear sky', '☀️'],
+    1: ['Mainly clear', '🌤️'],
+    2: ['Partly cloudy', '⛅'],
+    3: ['Overcast', '☁️'],
+    45: ['Foggy', '🌫️'],
+    48: ['Icy fog', '🌫️'],
+    51: ['Light drizzle', '🌦️'],
+    53: ['Drizzle', '🌦️'],
+    55: ['Heavy drizzle', '🌧️'],
+    61: ['Light rain', '🌦️'],
+    63: ['Rain', '🌧️'],
+    65: ['Heavy rain', '🌧️'],
+    71: ['Light snow', '🌨️'],
+    73: ['Snow', '🌨️'],
+    75: ['Heavy snow', '❄️'],
+    80: ['Showers', '🌦️'],
+    81: ['Rain showers', '🌧️'],
+    82: ['Violent showers', '⛈️'],
+    95: ['Thunderstorm', '⛈️'],
+    99: ['Thunderstorm', '⛈️'],
+  };
+
+  function getCondition(code) {
+    return CONDITIONS[code] || ['Unknown', '🌤️'];
+  }
+
+  async function fetchWeather() {
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FParis&forecast_days=2&temperature_unit=celsius`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const cur = data.current;
+      const daily = data.daily;
+
+      const [condNow, iconNow] = getCondition(cur.weather_code);
+      document.getElementById('icon-now').textContent = iconNow;
+      document.getElementById('temp-now').textContent = Math.round(cur.temperature_2m) + '°';
+      document.getElementById('feels').textContent = 'feels like ' + Math.round(cur.apparent_temperature) + '°';
+      document.getElementById('condition-now').textContent = condNow;
+
+      // today
+      const [condToday, iconToday] = getCondition(daily.weather_code[0]);
+      document.getElementById('icon-today').textContent = iconToday;
+      document.getElementById('temp-today').textContent = Math.round(daily.temperature_2m_max[0]) + '°';
+      document.getElementById('range-today').textContent = 'H ' + Math.round(daily.temperature_2m_max[0]) + '° / L ' + Math.round(daily.temperature_2m_min[0]) + '°';
+      document.getElementById('rain-today').textContent = '💧 ' + daily.precipitation_probability_max[0] + '% rain';
+
+      // tomorrow
+      const [condTomorrow, iconTomorrow] = getCondition(daily.weather_code[1]);
+      document.getElementById('icon-tomorrow').textContent = iconTomorrow;
+      document.getElementById('temp-tomorrow').textContent = Math.round(daily.temperature_2m_max[1]) + '°';
+      document.getElementById('range-tomorrow').textContent = 'H ' + Math.round(daily.temperature_2m_max[1]) + '° / L ' + Math.round(daily.temperature_2m_min[1]) + '°';
+      document.getElementById('rain-tomorrow').textContent = '💧 ' + daily.precipitation_probability_max[1] + '% rain';
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('widget').style.display = 'flex';
+    } catch(e) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+    }
+  }
+
+  fetchWeather();
+  setInterval(fetchWeather, 30 * 60 * 1000); // refresh every 30 mins
+</script>
+</body>
+</html>
