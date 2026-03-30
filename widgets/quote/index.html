@@ -3,27 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quote Widget</title>
+<title>Daily Quote</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { margin: 0; padding: 0; overflow: hidden; }
-  body {
-    font-family: 'DM Mono', monospace;
-    padding: 10px 16px 12px;
-  }
+  body { font-family: 'DM Mono', monospace; padding: 10px 16px 12px; }
   .quote {
     font-family: 'DM Serif Display', serif;
     font-style: italic;
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 13px;
+    line-height: 1.7;
     color: var(--text);
     margin-bottom: 8px;
   }
   .quote::before { content: '\201C'; }
   .quote::after  { content: '\201D'; }
   .author {
-    font-family: 'DM Mono', monospace;
     font-size: 9px;
     font-weight: 300;
     letter-spacing: 0.1em;
@@ -31,19 +27,19 @@
     color: var(--muted);
   }
   .tag {
-    display: inline-block;
     font-size: 8px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--tag);
-    margin-top: 4px;
+    margin-top: 3px;
+    display: block;
   }
 </style>
 </head>
 <body>
 <div class="quote" id="quote"></div>
 <div class="author" id="author"></div>
-<div class="tag" id="tag"></div>
+<span class="tag" id="tag"></span>
 
 <script>
   function setTheme() {
@@ -59,69 +55,88 @@
   setTheme();
 
   const quotes = [
-    // poetry & literature
-    { q: "I am not afraid of storms, for I am learning how to sail my ship.", a: "Louisa May Alcott", t: "literature" },
-    { q: "There is no greater agony than bearing an untold story inside you.", a: "Maya Angelou", t: "literature" },
-    { q: "You only are free when you realize you belong no place — you belong every place — no place at all.", a: "Maya Angelou", t: "literature" },
-    { q: "I took a deep breath and listened to the old brag of my heart: I am, I am, I am.", a: "Sylvia Plath", t: "poetry" },
+    // audre lorde
+    { q: "When I dare to be powerful, to use my strength in the service of my vision, then it becomes less and less important whether I am afraid.", a: "Audre Lorde", t: "courage" },
+    { q: "It is not our differences that divide us. It is our inability to recognize, accept, and celebrate those differences.", a: "Audre Lorde", t: "identity" },
+    { q: "Your silence will not protect you.", a: "Audre Lorde", t: "courage" },
+    { q: "I am not free while any woman is unfree, even when her shackles are very different from my own.", a: "Audre Lorde", t: "solidarity" },
+    { q: "Poetry is not a luxury. It is a vital necessity of our existence.", a: "Audre Lorde", t: "creativity" },
+    // adrienne rich
+    { q: "Lying is done with words and also with silence.", a: "Adrienne Rich", t: "truth" },
+    { q: "The moment of change is the only poem.", a: "Adrienne Rich", t: "poetry" },
+    { q: "We are not simply in the present moment, but with all we have been.", a: "Adrienne Rich", t: "life" },
+    // mary oliver
     { q: "Tell me, what is it you plan to do with your one wild and precious life?", a: "Mary Oliver", t: "poetry" },
-    { q: "Instructions for living a life: Pay attention. Be astonished. Tell about it.", a: "Mary Oliver", t: "poetry" },
-    { q: "You do not have to be good. You do not have to walk on your knees for a hundred miles through the desert repenting.", a: "Mary Oliver", t: "poetry" },
-    { q: "She is too fond of books, and it has turned her brain.", a: "Louisa May Alcott", t: "literature" },
-    { q: "I am not a writer except when I write.", a: "Juan Carlos Onetti", t: "literature" },
-    { q: "We read to know we are not alone.", a: "C.S. Lewis", t: "literature" },
-    { q: "A word after a word after a word is power.", a: "Margaret Atwood", t: "poetry" },
-    { q: "Poetry is when an emotion has found its thought and the thought has found words.", a: "Robert Frost", t: "poetry" },
-    { q: "If you feel the urge, don't be afraid to go on a wild goose chase. What do you think wild geese are for anyway?", a: "Mary Oliver", t: "poetry" },
-    { q: "The most regretful people on earth are those who felt the call to creative work, who felt their own creative power restive and uprising, and gave to it neither power nor time.", a: "Mary Oliver", t: "poetry" },
-    // creativity & art
-    { q: "Creativity is intelligence having fun.", a: "Albert Einstein", t: "creativity" },
-    { q: "Art enables us to find ourselves and lose ourselves at the same time.", a: "Thomas Merton", t: "art" },
-    { q: "The world always seems brighter when you've just made something that wasn't there before.", a: "Neil Gaiman", t: "creativity" },
+    { q: "Instructions for living a life: Pay attention. Be astonished. Tell about it.", a: "Mary Oliver", t: "creativity" },
+    { q: "You do not have to be good. You do not have to walk on your knees for a hundred miles through the desert repenting.", a: "Mary Oliver", t: "permission" },
+    { q: "The most regretful people on earth are those who felt the call to creative work and gave to it neither power nor time.", a: "Mary Oliver", t: "creativity" },
+    { q: "Keep some room in your heart for the unimaginable.", a: "Mary Oliver", t: "wonder" },
+    // nayyirah waheed
+    { q: "you are not small. you are large. a universe crumpled to fit inside a human.", a: "Nayyirah Waheed", t: "identity" },
+    { q: "if someone does not want me it is not the end of the world. but if i do not want me — the world is nothing but endings.", a: "Nayyirah Waheed", t: "self" },
+    { q: "be easy. take your time. you are coming home to yourself.", a: "Nayyirah Waheed", t: "self" },
+    // rupi kaur
+    { q: "what is stronger than the human heart which shatters over and over and still lives.", a: "Rupi Kaur", t: "resilience" },
+    { q: "you must want to spend the rest of your life with yourself first.", a: "Rupi Kaur", t: "self" },
+    { q: "the world gives you so much pain and here you are making gold out of it.", a: "Rupi Kaur", t: "creativity" },
+    // andrea gibson
+    { q: "You are not a burden. You are a human being with needs.", a: "Andrea Gibson", t: "compassion" },
+    { q: "The most revolutionary thing you can do is believe in your own worth.", a: "Andrea Gibson", t: "courage" },
+    { q: "I want to write poems that hold the door open for everyone who needs to walk through.", a: "Andrea Gibson", t: "poetry" },
+    // ocean vuong
+    { q: "To be the best storyteller, you have to be deeply human first.", a: "Ocean Vuong", t: "creativity" },
+    { q: "Let me begin again as a speck of dust caught in the light.", a: "Ocean Vuong", t: "poetry" },
+    { q: "We are all, always, in the act of becoming.", a: "Ocean Vuong", t: "life" },
+    // nikki giovanni
+    { q: "Mistakes are a fact of life. It is the response to error that counts.", a: "Nikki Giovanni", t: "resilience" },
+    { q: "I really don't think life is about the I-could-have-beens. Life is only about the I-tried-to-do.", a: "Nikki Giovanni", t: "life" },
+    // brené brown
+    { q: "Vulnerability is not winning or losing; it's having the courage to show up and be seen when we have no control over the outcome.", a: "Bren\u00e9 Brown", t: "courage" },
+    { q: "You are imperfect, you are wired for struggle, but you are also worthy of love and belonging.", a: "Bren\u00e9 Brown", t: "self" },
+    { q: "Owning our story can be hard but not nearly as difficult as spending our lives running from it.", a: "Bren\u00e9 Brown", t: "truth" },
+    { q: "Vulnerability sounds like truth and feels like courage. Truth and courage aren't always comfortable, but they're never weakness.", a: "Bren\u00e9 Brown", t: "courage" },
+    { q: "The root of the word courage is cor — the Latin word for heart. Speaking from our hearts is the most courageous thing we can do.", a: "Bren\u00e9 Brown", t: "courage" },
+    { q: "Rest and play are as vital to our health as nutrition and exercise.", a: "Bren\u00e9 Brown", t: "self" },
+    // glennon doyle
+    { q: "We can do hard things.", a: "Glennon Doyle", t: "courage" },
+    { q: "Stop asking yourself what the world needs and start asking what makes you come alive, because what the world needs is people who have come alive.", a: "Glennon Doyle", t: "life" },
+    { q: "The braver I am, the luckier I get.", a: "Glennon Doyle", t: "courage" },
+    // cheryl strayed
+    { q: "The useless days will add up to something. The shitty waitressing jobs. The hours writing in your journal. The long meandering walks. Trust yourself.", a: "Cheryl Strayed", t: "creativity" },
+    { q: "You don't have a right to the cards you believe you should have been dealt. You have an obligation to play the hell out of the ones you're holding.", a: "Cheryl Strayed", t: "resilience" },
+    { q: "Be about ten times more magnanimous than you believe yourself capable of being.", a: "Cheryl Strayed", t: "compassion" },
+    // fatimah asghar
+    { q: "I want to be made, again and again, into someone the world has not yet seen.", a: "Fatimah Asghar", t: "identity" },
+    { q: "What is a border but a wound that's been told it's a door?", a: "Fatimah Asghar", t: "poetry" },
+    // kate tempest
+    { q: "The act of writing is an act of faith.", a: "Kate Tempest", t: "creativity" },
+    { q: "Everything is energy and energy is everything.", a: "Kate Tempest", t: "life" },
+    // maya angelou
+    { q: "There is no greater agony than bearing an untold story inside you.", a: "Maya Angelou", t: "creativity" },
     { q: "You can't use up creativity. The more you use, the more you have.", a: "Maya Angelou", t: "creativity" },
-    { q: "Every artist dips their brush in their own soul and paints their own nature into their pictures.", a: "Henry Ward Beecher", t: "art" },
-    { q: "An empty canvas is full.", a: "Robert Rauschenberg", t: "art" },
-    { q: "Art is not what you see, but what you make others see.", a: "Edgar Degas", t: "art" },
-    { q: "The job of the artist is always to deepen the mystery.", a: "Francis Bacon", t: "art" },
-    { q: "Making things is the most important thing. Not planning to make things.", a: "Austin Kleon", t: "creativity" },
-    { q: "You have to be willing to be embarrassed by your early work.", a: "Austin Kleon", t: "creativity" },
-    { q: "Steal like an artist.", a: "Austin Kleon", t: "creativity" },
-    { q: "Every child is an artist. The problem is staying an artist when you grow up.", a: "Pablo Picasso", t: "art" },
-    // life & philosophy
-    { q: "The present moment always will have been.", a: "Simone de Beauvoir", t: "philosophy" },
-    { q: "One is not born, but rather becomes, a woman.", a: "Simone de Beauvoir", t: "philosophy" },
-    { q: "In the middle of difficulty lies opportunity.", a: "Albert Einstein", t: "life" },
-    { q: "The most common form of despair is not being who you are.", a: "S\u00f8ren Kierkegaard", t: "philosophy" },
-    { q: "Do what you can, with what you have, where you are.", a: "Theodore Roosevelt", t: "life" },
-    { q: "Simplicity is the ultimate sophistication.", a: "Leonardo da Vinci", t: "life" },
-    { q: "It always seems impossible until it is done.", a: "Nelson Mandela", t: "life" },
-    { q: "The secret of getting ahead is getting started.", a: "Mark Twain", t: "life" },
-    { q: "To live is the rarest thing in the world. Most people just exist.", a: "Oscar Wilde", t: "life" },
-    { q: "Be yourself; everyone else is already taken.", a: "Oscar Wilde", t: "life" },
-    { q: "We are what we repeatedly do. Excellence is not an act, but a habit.", a: "Aristotle", t: "philosophy" },
-    { q: "The unexamined life is not worth living.", a: "Socrates", t: "philosophy" },
-    { q: "In order to be irreplaceable, one must always be different.", a: "Coco Chanel", t: "life" },
-    { q: "The most courageous act is still to think for yourself. Aloud.", a: "Coco Chanel", t: "life" },
-    { q: "Not all those who wander are lost.", a: "J.R.R. Tolkien", t: "literature" },
-    // motherhood & family
-    { q: "Motherhood: all love begins and ends there.", a: "Robert Browning", t: "motherhood" },
-    { q: "A mother's love for her child is like nothing else in the world.", a: "Agatha Christie", t: "motherhood" },
-    { q: "Biology is the least of what makes someone a mother.", a: "Oprah Winfrey", t: "motherhood" },
-    { q: "The natural state of motherhood is unselfishness.", a: "Jessica Lange", t: "motherhood" },
-    { q: "You are the closest I will ever come to magic.", a: "Suzanne Finnamore", t: "motherhood" },
+    { q: "Nothing will work unless you do.", a: "Maya Angelou", t: "life" },
+    { q: "I've learned that people will forget what you said, people will forget what you did, but people will never forget how you made them feel.", a: "Maya Angelou", t: "life" },
+    // toni morrison
+    { q: "If you have some power, then your job is to empower somebody else.", a: "Toni Morrison", t: "solidarity" },
+    { q: "You wanna fly, you got to give up the shit that weighs you down.", a: "Toni Morrison", t: "life" },
+    { q: "Definitions belong to the definers, not the defined.", a: "Toni Morrison", t: "identity" },
+    // bell hooks
+    { q: "To be truly visionary we have to root our imagination in our concrete reality while simultaneously imagining possibilities beyond that reality.", a: "bell hooks", t: "vision" },
+    { q: "Love is an action, never simply a feeling.", a: "bell hooks", t: "love" },
+    // simone de beauvoir
+    { q: "One is not born, but rather becomes, a woman.", a: "Simone de Beauvoir", t: "identity" },
+    { q: "Change your life today. Don't gamble on the future, act now, without delay.", a: "Simone de Beauvoir", t: "courage" },
+    // motherhood
     { q: "There is no way to be a perfect mother, and a million ways to be a good one.", a: "Jill Churchill", t: "motherhood" },
     { q: "Making the decision to have a child is momentous. It is to decide forever to have your heart go walking outside your body.", a: "Elizabeth Stone", t: "motherhood" },
-    { q: "A child can teach an adult three things: to be happy for no reason, to always be curious, and to fight tirelessly for something.", a: "Paulo Coelho", t: "motherhood" },
-    { q: "In family life, love is the oil that eases friction, the cement that binds closer together.", a: "Friedrich Nietzsche", t: "family" },
-    { q: "Family is not an important thing. It's everything.", a: "Michael J. Fox", t: "family" },
+    { q: "You are the closest I will ever come to magic.", a: "Suzanne Finnamore", t: "motherhood" },
+    { q: "Motherhood is the greatest thing and the hardest thing.", a: "Ricki Lake", t: "motherhood" },
   ];
 
   function getDailyQuote() {
-    // seed by day so it changes daily but stays fixed within the day
     const now = new Date();
     const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-    const index = seed % quotes.length;
-    return quotes[index];
+    return quotes[seed % quotes.length];
   }
 
   function render() {
@@ -133,7 +148,6 @@
 
   render();
 
-  // refresh at midnight
   const now = new Date();
   const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
   setTimeout(() => { render(); setInterval(render, 24 * 60 * 60 * 1000); }, msToMidnight);
