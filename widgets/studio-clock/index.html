@@ -7,26 +7,37 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: transparent;
-    font-family: 'DM Mono', monospace;
-    padding: 8px 12px;
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
     overflow: hidden;
+    display: block;
   }
-  .widget { display: flex; flex-direction: column; gap: 2px; }
+  body {
+    font-family: 'DM Mono', monospace;
+    line-height: 1;
+  }
+  .widget {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 0;
+  }
   .greeting {
     font-family: 'DM Serif Display', serif;
     font-style: italic;
-    font-size: 12px;
+    font-size: 11px;
     color: #7a6a60;
     letter-spacing: 0.02em;
+    line-height: 1.2;
   }
   .date-line {
     font-family: 'DM Serif Display', serif;
-    font-size: 18px;
+    font-size: 17px;
     color: #e8e0d8;
     letter-spacing: -0.01em;
-    line-height: 1.15;
+    line-height: 1.2;
   }
   .time {
     font-family: 'DM Mono', monospace;
@@ -34,7 +45,7 @@
     font-weight: 300;
     color: #6a5a50;
     letter-spacing: 0.08em;
-    margin-top: 2px;
+    line-height: 1.2;
     display: block;
   }
   .pulse { animation: blink 1s step-end infinite; }
