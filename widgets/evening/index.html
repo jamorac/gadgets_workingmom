@@ -36,24 +36,24 @@ html, body { background: transparent; font-family: -apple-system, BlinkMacSystem
   <p class="sec-label">evening</p>
 
   <div class="sec-title" onclick="toggleSec('ef-body','ef-arr')">
-    <span class="arrow open" id="ef-arr">▶</span>🌙 wind down
+    <span class="arrow open" id="ef-arr">&#9658;</span>&#127769; wind down
   </div>
   <div class="bar-wrap"><div class="bar-track"><div class="bar-fill" id="ef-bar" style="background:#9a8060;width:0%"></div></div></div>
   <div class="collapsible" id="ef-body" style="max-height:600px">
     <div class="task" onclick="tick(this,'ef',4,false)">
       <div class="cb"></div><span class="task-text">meds</span>
-      <span class="sub-toggle" onclick="event.stopPropagation();toggleSub('emeds-sub',this)">▶ 1</span>
+      <span class="sub-toggle" onclick="event.stopPropagation();toggleSub('emeds-sub',this)">&#9658; 1</span>
     </div>
     <div class="collapsible" id="emeds-sub" style="max-height:0">
-      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">metformin</span></div>
+      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">evening med</span></div>
     </div>
     <div class="task" onclick="tick(this,'ef',4,false)"><div class="cb"></div><span class="task-text">brush + floss</span></div>
-    <div class="task" onclick="tick(this,'ef',4,false)"><div class="cb"></div><span class="task-text">c-section massage</span></div>
+    <div class="task" onclick="tick(this,'ef',4,false)"><div class="cb"></div><span class="task-text">scar massage</span></div>
     <div class="task" onclick="tick(this,'ef',4,false)"><div class="cb"></div><span class="task-text">tea</span></div>
   </div>
 
   <div class="sec-title" style="margin-top:16px" onclick="toggleSec('eb-body','eb-arr')">
-    <span class="arrow" id="eb-arr">▶</span>🌿 unwind
+    <span class="arrow" id="eb-arr">&#9658;</span>&#127807; unwind
   </div>
   <div class="bar-wrap"><div class="bar-track"><div class="bar-fill" id="eb-bar" style="background:#7a72c0;width:0%"></div></div></div>
   <div class="collapsible" id="eb-body" style="max-height:0">
@@ -81,13 +81,13 @@ function tick(el, group, total, isBoosted) {
   if (isDone && isBoosted) sparkle(el);
 }
 function sparkle(el) {
-  const chars = ['✨','🌙','💫','✦'];
+  const chars = ['&#10024;','&#127769;','&#128171;','&#10022;'];
   const rect = el.getBoundingClientRect();
   for (let i = 0; i < 3; i++) {
     setTimeout(() => {
       const s = document.createElement('span');
       s.className = 'spark';
-      s.textContent = chars[Math.floor(Math.random()*chars.length)];
+      s.innerHTML = chars[Math.floor(Math.random()*chars.length)];
       s.style.left = (rect.left + Math.random() * Math.max(rect.width,40)) + 'px';
       s.style.top = (rect.top + window.scrollY) + 'px';
       document.body.appendChild(s);
@@ -108,8 +108,8 @@ function toggleSub(id, btn) {
   if (!el) return;
   const isOpen = el.style.maxHeight !== '0px' && el.style.maxHeight !== '0';
   el.style.maxHeight = isOpen ? '0' : '200px';
-  const num = btn.textContent.replace(/[▶▼\s]/g,'');
-  btn.textContent = isOpen ? '▶ ' + num : '▼ ' + num;
+  const num = btn.textContent.replace(/[\s\S]*?(\d+)/,'$1');
+  btn.innerHTML = isOpen ? '&#9658; ' + num : '&#9660; ' + num;
 }
 </script>
 </body>
