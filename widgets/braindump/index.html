@@ -6,7 +6,7 @@
 <title>brain dump</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 .w { background: #1a1917; color: #e4dfd8; border-radius: 14px; padding: 20px 18px; }
 .sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; margin-bottom: 10px; }
 .task { display: flex; align-items: flex-start; gap: 9px; padding: 6px 0; border-bottom: .5px solid #222120; cursor: pointer; user-select: none; }
@@ -28,22 +28,24 @@ html, body { background: transparent; font-family: -apple-system, BlinkMacSystem
 <body>
 <div class="w">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <p class="sec-label" style="margin:0">brain dump — today</p>
+    <p class="sec-label" style="margin:0">brain dump &#8212; today</p>
     <span id="sync-time" style="font-size:10px;color:#3a3835"></span>
   </div>
   <div id="tasks-list"><p class="loading">loading tasks...</p></div>
-  <button class="btn" onclick="loadTasks()">refresh ↺</button>
+  <button class="btn" onclick="loadTasks()">refresh &#8635;</button>
 </div>
 <script>
+function setBackground() {
+  try {
+    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.style.background = isDark ? '#191919' : '#ffffff';
+  } catch(e) { document.body.style.background = '#ffffff'; }
+}
+if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addListener(setBackground);
+setBackground();
 const SKEY = 'studio_braindump_v1';
 const TODAY = new Date().toDateString();
-const TAG_COLORS = {
-  'low-energy': 't-low',
-  'quick-win': 't-quick',
-  'admin': 't-admin',
-  'creative': 't-creative'
-};
-
+const TAG_COLORS = { 'low-energy':'t-low', 'quick-win':'t-quick', 'admin':'t-admin', 'creative':'t-creative' };
 function getState() {
   try {
     const s = JSON.parse(localStorage.getItem(SKEY) || 'null');
@@ -52,73 +54,50 @@ function getState() {
   } catch(e) { return { date: TODAY, done: [], tasksDone: 0 }; }
 }
 function save(s) { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch(e) {} }
-
 let currentTasks = [];
-
 async function loadTasks() {
   const list = document.getElementById('tasks-list');
-  list.innerHTML = '<p class="loading">syncing from ticktick...</p>';
+  list.innerHTML = '<p class="loading">syncing...</p>';
   try {
     const resp = await fetch('https://jamorac.github.io/gadgets_workingmom/widgets/braindump/tasks.json?v=' + Date.now());
     const data = await resp.json();
     currentTasks = data.tasks || [];
+    if (currentTasks.length === 0) { renderFallback(); return; }
     renderTasks(currentTasks);
     const el = document.getElementById('sync-time');
-    if (el && data.updated) el.textContent = 'synced ' + new Date(data.updated).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  } catch(e) {
-    renderFallback();
-  }
+    if (el && data.updated) el.textContent = 'synced ' + new Date(data.updated).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  } catch(e) { renderFallback(); }
 }
-
 function renderFallback() {
-  const fallback = [
-    { title: 'Apply for Noah\'s social security', tag: 'admin' },
-    { title: 'Check embassy appt for Noah', tag: 'low-energy' },
-    { title: 'Look at flight tickets', tag: 'quick-win' }
-  ];
-  currentTasks = fallback;
-  renderTasks(fallback);
+  document.getElementById('tasks-list').innerHTML = '<p class="loading" style="color:#3a3835">no tasks loaded &#8212; check back later</p>';
 }
-
 function renderTasks(tasks) {
   const st = getState();
-  const list = document.getElementById('tasks-list');
-  const top3 = tasks.slice(0, 3);
-  list.innerHTML = top3.map((t, i) => {
+  const top3 = tasks.slice(0,3);
+  document.getElementById('tasks-list').innerHTML = top3.map(t => {
     const isDone = st.done.includes(t.title);
     const tagClass = TAG_COLORS[t.tag] || '';
     const tagHtml = t.tag ? `<span class="tag ${tagClass}">#${t.tag}</span>` : '';
     return `<div class="task" onclick="tickTask(this,'${t.title.replace(/'/g,"&#39;")}')">
       <div class="cb${isDone?' done':''}" style="${isDone?'background:#5a9a7a;border-color:transparent':''}"></div>
-      <span class="task-text${isDone?' done':''}">${t.title}</span>
-      ${tagHtml}
-    </div>`;
+      <span class="task-text${isDone?' done':''}">${t.title}</span>${tagHtml}</div>`;
   }).join('');
 }
-
 function tickTask(el, title) {
-  const cb = el.querySelector('.cb');
-  const txt = el.querySelector('.task-text');
+  const cb = el.querySelector('.cb'), txt = el.querySelector('.task-text');
   if (!cb || !txt) return;
-  const isDone = cb.classList.toggle('done');
-  txt.classList.toggle('done', isDone);
+  const isDone = cb.classList.toggle('done'); txt.classList.toggle('done', isDone);
   cb.style.background = isDone ? '#5a9a7a' : '';
-  cb.style.borderColor = isDone ? '#5a9a7a' : 'transparent';
-  if (isDone) cb.style.borderColor = 'transparent';
+  cb.style.borderColor = isDone ? 'transparent' : '';
   const st = getState();
-  if (isDone) { if (!st.done.includes(title)) st.done.push(title); st.tasksDone = (st.tasksDone||0) + 1; }
+  if (isDone) { if (!st.done.includes(title)) st.done.push(title); st.tasksDone = (st.tasksDone||0)+1; }
   else { st.done = st.done.filter(d => d !== title); st.tasksDone = Math.max(0,(st.tasksDone||1)-1); }
   save(st);
-  try { localStorage.setItem('studio_tasks_done_total', String(getTotalTasksDone())); } catch(e) {}
-}
-
-function getTotalTasksDone() {
   try {
-    const prev = parseInt(localStorage.getItem('studio_tasks_done_total') || '0');
-    return prev;
-  } catch(e) { return 0; }
+    const total = parseInt(localStorage.getItem('studio_tasks_done_total')||'0');
+    localStorage.setItem('studio_tasks_done_total', String(Math.max(0, total + (isDone?1:-1))));
+  } catch(e) {}
 }
-
 loadTasks();
 </script>
 </body>
