@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>morning</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.w { background: #1a1917; color: #e4dfd8; border-radius: 14px; padding: 20px 18px; }
+hr.div { border: none; border-top: .5px solid #262422; margin: 16px 0; }
+.sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; margin-bottom: 8px; }
+.sec-title { font-size: 13px; font-weight: 500; color: #d8d2ca; cursor: pointer; display: flex; align-items: center; gap: 7px; user-select: none; }
+.arrow { font-size: 9px; color: #4e4a46; transition: transform .2s; display: inline-block; flex-shrink: 0; }
+.arrow.open { transform: rotate(90deg); }
+.collapsible { overflow: hidden; transition: max-height .35s ease; }
+.bar-wrap { display: flex; align-items: center; gap: 8px; margin: 7px 0 12px; }
+.bar-track { flex: 1; height: 3px; background: #262422; border-radius: 99px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
+.task { display: flex; align-items: flex-start; gap: 9px; padding: 5px 0; border-bottom: .5px solid #222120; cursor: pointer; user-select: none; }
+.task:last-child { border-bottom: none; }
+.task.sub { padding-left: 20px; }
+.cb { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid #363330; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.cb.done { border-color: transparent; }
+.cb.done::after { content: ''; width: 6px; height: 3.5px; border-left: 1.5px solid #1a1917; border-bottom: 1.5px solid #1a1917; transform: rotate(-45deg) translateY(-1px); display: block; }
+.task-text { font-size: 12.5px; color: #b8b2aa; line-height: 1.5; flex: 1; transition: color .15s; }
+.task-text.done { color: #363330; text-decoration: line-through; }
+.sub-toggle { font-size: 9px; color: #4e4a46; cursor: pointer; flex-shrink: 0; padding: 2px 4px; }
+.sub-toggle:hover { color: #8a8480; }
+.spark { position: fixed; pointer-events: none; font-size: 13px; animation: floatup .9s ease-out forwards; z-index: 9999; }
+@keyframes floatup { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-44px) scale(1.3)} }
+</style>
+</head>
+<body>
+<div class="w">
+
+  <p class="sec-label">morning</p>
+
+  <div class="sec-title" onclick="toggleSec('mf-body','mf-arr')">
+    <span class="arrow open" id="mf-arr">▶</span>☀️ wake up
+  </div>
+  <div class="bar-wrap"><div class="bar-track"><div class="bar-fill" id="mf-bar" style="background:#9a8060;width:0%"></div></div></div>
+  <div class="collapsible" id="mf-body" style="max-height:600px">
+    <div class="task" onclick="tick(this,'mf',7,false)">
+      <div class="cb"></div><span class="task-text">meds</span>
+      <span class="sub-toggle" onclick="event.stopPropagation();toggleSub('meds-sub',this)">▶ 4</span>
+    </div>
+    <div class="collapsible" id="meds-sub" style="max-height:0">
+      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">levothyrox</span></div>
+      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">sertraline</span></div>
+      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">pentasa</span></div>
+      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">multi-vitamin</span></div>
+    </div>
+    <div class="task" onclick="tick(this,'mf',7,false)"><div class="cb"></div><span class="task-text">wash face</span></div>
+    <div class="task" onclick="tick(this,'mf',7,false)"><div class="cb"></div><span class="task-text">brush teeth</span></div>
+    <div class="task" onclick="tick(this,'mf',7,false)"><div class="cb"></div><span class="task-text">brush hair</span></div>
+    <div class="task" onclick="tick(this,'mf',7,false)"><div class="cb"></div><span class="task-text">coffee</span></div>
+    <div class="task" onclick="tick(this,'mf',7,false)"><div class="cb"></div><span class="task-text">open windows</span></div>
+    <div class="task" onclick="tick(this,'mf',7,false)"><div class="cb"></div><span class="task-text">one intention for today</span></div>
+  </div>
+
+  <div class="sec-title" style="margin-top:16px" onclick="toggleSec('mb-body','mb-arr')">
+    <span class="arrow" id="mb-arr">▶</span>🌸 right side of the bed
+  </div>
+  <div class="bar-wrap"><div class="bar-track"><div class="bar-fill" id="mb-bar" style="background:#5a9a7a;width:0%"></div></div></div>
+  <div class="collapsible" id="mb-body" style="max-height:0">
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">vacuum paddy hair</span></div>
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">make bed</span></div>
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">play music</span></div>
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">change clothes</span></div>
+    <div class="task" onclick="tick(this,'mb',11,true)">
+      <div class="cb"></div><span class="task-text">skincare</span>
+      <span class="sub-toggle" onclick="event.stopPropagation();toggleSub('skin-sub',this)">▶ 4</span>
+    </div>
+    <div class="collapsible" id="skin-sub" style="max-height:0">
+      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">P50W</span></div>
+      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">Laneige toner</span></div>
+      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">Laneige water bank</span></div>
+      <div class="task sub"><div class="cb" style="opacity:.3;pointer-events:none"></div><span class="task-text" style="color:#5a5652">Dior eye cream</span></div>
+    </div>
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">stretch</span></div>
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">journal</span></div>
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">quick room tidy</span></div>
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">light makeup</span></div>
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">style hair</span></div>
+    <div class="task" onclick="tick(this,'mb',11,true)"><div class="cb"></div><span class="task-text">matcha</span></div>
+  </div>
+
+</div>
+<script>
+const SKEY = 'studio_morning_v1';
+const TODAY = new Date().toDateString();
+function getState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SKEY) || 'null');
+    if (!s || s.date !== TODAY) return { date: TODAY, mfDone: false };
+    return s;
+  } catch(e) { return { date: TODAY, mfDone: false }; }
+}
+function save(s) { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch(e) {} }
+const counts = {};
+const MF_TOTAL = 7;
+let mfComplete = false;
+function tick(el, group, total, isBoosted) {
+  const cb = el.querySelector('.cb');
+  const txt = el.querySelector('.task-text');
+  if (!cb || !txt) return;
+  const isDone = cb.classList.toggle('done');
+  txt.classList.toggle('done', isDone);
+  const c = group === 'mb' ? '#5a9a7a' : '#9a8060';
+  cb.style.background = isDone ? c : '';
+  cb.style.borderColor = isDone ? c : '';
+  if (!counts[group]) counts[group] = 0;
+  counts[group] = Math.max(0, counts[group] + (isDone ? 1 : -1));
+  const pct = Math.min(100, Math.round(counts[group] / total * 100));
+  const bar = document.getElementById(group + '-bar');
+  if (bar) bar.style.width = pct + '%';
+  if (isDone && isBoosted) sparkle(el);
+  if (group === 'mf' && counts['mf'] >= MF_TOTAL && !mfComplete) {
+    mfComplete = true;
+    const st = getState();
+    st.mfDone = true;
+    save(st);
+    try { localStorage.setItem('studio_mf_done_' + TODAY, '1'); } catch(e) {}
+  }
+}
+function sparkle(el) {
+  const chars = ['✨','⭐','💫','✦'];
+  const rect = el.getBoundingClientRect();
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+      const s = document.createElement('span');
+      s.className = 'spark';
+      s.textContent = chars[Math.floor(Math.random()*chars.length)];
+      s.style.left = (rect.left + Math.random() * Math.max(rect.width,40)) + 'px';
+      s.style.top = (rect.top + window.scrollY) + 'px';
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 1000);
+    }, i * 100);
+  }
+}
+function toggleSec(bodyId, arrId) {
+  const body = document.getElementById(bodyId);
+  const arr = document.getElementById(arrId);
+  if (!body) return;
+  const isOpen = body.style.maxHeight !== '0px' && body.style.maxHeight !== '0';
+  body.style.maxHeight = isOpen ? '0' : '800px';
+  if (arr) arr.classList.toggle('open', !isOpen);
+}
+function toggleSub(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isOpen = el.style.maxHeight !== '0px' && el.style.maxHeight !== '0';
+  el.style.maxHeight = isOpen ? '0' : '200px';
+  const num = btn.textContent.replace(/[▶▼\s]/g,'');
+  btn.textContent = isOpen ? '▶ ' + num : '▼ ' + num;
+}
+</script>
+</body>
+</html>

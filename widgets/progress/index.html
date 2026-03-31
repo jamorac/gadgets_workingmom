@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>progress</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.w { background: #1a1917; color: #e4dfd8; border-radius: 14px; padding: 20px 18px; }
+.sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; }
+.arrow { font-size: 9px; color: #4e4a46; transition: transform .2s; display: inline-block; flex-shrink: 0; }
+.arrow.open { transform: rotate(90deg); }
+.collapsible { overflow: hidden; transition: max-height .35s ease; }
+.week-row { display: flex; gap: 10px; align-items: center; }
+.wday { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.wdot { width: 9px; height: 9px; border-radius: 50%; background: #2a2826; transition: background .3s; }
+.wdot.done { background: #5a9a7a; }
+.wdot.today { box-shadow: 0 0 0 1.5px #5a9a7a; }
+.wdot.today.done { background: #5a9a7a; }
+.wlabel { font-size: 9px; color: #3e3a36; text-transform: uppercase; letter-spacing: .05em; }
+.month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 14px; }
+.month-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.month-num { font-size: 20px; font-weight: 500; color: #c8c2ba; line-height: 1; }
+.month-lbl { font-size: 9px; color: #4e4a46; text-transform: uppercase; letter-spacing: .06em; }
+.stat-row { display: flex; gap: 0; padding-top: 14px; border-top: .5px solid #262422; }
+.stat-cell { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.stat-cell + .stat-cell { border-left: .5px solid #262422; padding-left: 16px; }
+.stat-num { font-size: 26px; font-weight: 500; color: #c8c2ba; line-height: 1; }
+.stat-lbl { font-size: 9px; color: #4e4a46; text-transform: uppercase; letter-spacing: .06em; }
+.int-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 4px; }
+.goal-item { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 6px; cursor: pointer; user-select: none; }
+.goal-item:hover { background: #222120; }
+.goal-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #363330; flex-shrink: 0; transition: all .15s; }
+.goal-text { font-size: 12px; color: #7a7470; transition: color .15s; }
+.goal-text.done { color: #363330; text-decoration: line-through; }
+</style>
+</head>
+<body>
+<div class="w">
+
+  <!-- INTENTIONS -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer" onclick="toggleSec('int-body','int-arr')">
+    <div style="display:flex;align-items:center;gap:7px">
+      <span class="arrow" id="int-arr">▶</span>
+      <span class="sec-label" style="margin:0">✦ intentions</span>
+    </div>
+    <span style="font-size:10px;color:#3e3a36" id="int-hint">pick a few</span>
+  </div>
+  <div class="collapsible" id="int-body" style="max-height:0;margin-bottom:0">
+    <div class="int-grid" style="margin-top:6px;margin-bottom:12px">
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">paddy training</span></div>
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">paddy + noah walk</span></div>
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">baby activity with noah</span></div>
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">upskill something</span></div>
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">write or text a friend</span></div>
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">healthy smoothie</span></div>
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">take a picture</span></div>
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">face mask</span></div>
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">hair mask</span></div>
+      <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">move your body</span></div>
+    </div>
+  </div>
+
+  <div style="height:.5px;background:#262422;margin:12px 0"></div>
+
+  <!-- PROGRESS -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <span class="sec-label">progress</span>
+    <div class="week-row" id="week-dots"></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:7px;cursor:pointer;margin-bottom:4px" onclick="toggleSec('prog-body','prog-arr')">
+    <span class="arrow" id="prog-arr">▶</span>
+    <span style="font-size:11px;color:#4e4a46">more</span>
+  </div>
+  <div class="collapsible" id="prog-body" style="max-height:0;margin-top:10px">
+    <div class="month-grid" id="month-grid"></div>
+    <div class="stat-row">
+      <div class="stat-cell">
+        <span class="stat-num" id="tasks-num">0</span>
+        <span class="stat-lbl">tasks done in 2026</span>
+      </div>
+      <div class="stat-cell" style="padding-left:16px">
+        <span class="stat-num" id="mornings-num">0</span>
+        <span class="stat-lbl">mornings in 2026</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+const SKEY = 'studio_progress_v1';
+const TODAY = new Date().toDateString();
+const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const DAYS = ['s','m','t','w','t','f','s'];
+
+function getPresence() {
+  try { return JSON.parse(localStorage.getItem('studio_presence') || '[]'); } catch(e) { return []; }
+}
+function getTasksDone() {
+  try { return parseInt(localStorage.getItem('studio_tasks_done_total') || '0'); } catch(e) { return 0; }
+}
+
+function renderWeekDots() {
+  const el = document.getElementById('week-dots');
+  if (!el) return;
+  const now = new Date();
+  const presence = getPresence();
+  const todayDow = now.getDay();
+  el.innerHTML = DAYS.map((d,i) => {
+    const day = new Date(now);
+    day.setDate(now.getDate() - todayDow + i);
+    const ds = day.toDateString();
+    const isToday = ds === TODAY;
+    const done = presence.includes(ds);
+    return `<div class="wday"><div class="wdot${done?' done':''}${isToday?' today':''}"></div><span class="wlabel">${d}</span></div>`;
+  }).join('');
+}
+
+function renderMonthGrid() {
+  const el = document.getElementById('month-grid');
+  if (!el) return;
+  const now = new Date();
+  const presence = getPresence();
+  let html = '';
+  for (let m = 0; m <= now.getMonth(); m++) {
+    const count = presence.filter(d => {
+      const dd = new Date(d);
+      return dd.getFullYear() === 2026 && dd.getMonth() === m;
+    }).length;
+    html += `<div class="month-cell"><span class="month-num">${count}</span><span class="month-lbl">${MONTHS[m]}</span></div>`;
+  }
+  el.innerHTML = html;
+}
+
+function toggleSec(bodyId, arrId) {
+  const body = document.getElementById(bodyId);
+  const arr = document.getElementById(arrId);
+  if (!body) return;
+  const isOpen = body.style.maxHeight !== '0px' && body.style.maxHeight !== '0';
+  body.style.maxHeight = isOpen ? '0' : '600px';
+  if (arr) arr.classList.toggle('open', !isOpen);
+}
+
+let goalCount = 0;
+function toggleGoal(el) {
+  const dot = el.querySelector('.goal-dot');
+  const txt = el.querySelector('.goal-text');
+  const isDone = dot.classList.toggle('done');
+  txt.classList.toggle('done', isDone);
+  goalCount = Math.max(0, goalCount + (isDone ? 1 : -1));
+  dot.style.background = isDone ? '#5a9a7a' : '';
+  dot.style.borderColor = isDone ? '#5a9a7a' : '';
+  const hint = document.getElementById('int-hint');
+  if (hint) hint.textContent = goalCount === 0 ? 'pick a few' : goalCount + ' chosen';
+}
+
+function init() {
+  renderWeekDots();
+  renderMonthGrid();
+  document.getElementById('tasks-num').textContent = getTasksDone();
+  const presence = getPresence();
+  document.getElementById('mornings-num').textContent = presence.filter(d => d.includes('2026')).length;
+  setInterval(() => { renderWeekDots(); renderMonthGrid(); }, 30000);
+}
+init();
+</script>
+</body>
+</html>
