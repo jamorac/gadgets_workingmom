@@ -7,21 +7,21 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.w { background: #1a1917; color: #e4dfd8; border-radius: 14px; padding: 20px 18px; }
+.w { color: #e4dfd8; padding: 4px 2px; }
 .sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; margin-bottom: 8px; }
 .sec-title { font-size: 13px; font-weight: 500; color: #d8d2ca; cursor: pointer; display: flex; align-items: center; gap: 7px; user-select: none; }
 .arrow { font-size: 9px; color: #4e4a46; transition: transform .2s; display: inline-block; flex-shrink: 0; }
 .arrow.open { transform: rotate(90deg); }
 .collapsible { overflow: hidden; transition: max-height .35s ease; }
 .bar-wrap { display: flex; align-items: center; gap: 8px; margin: 7px 0 12px; }
-.bar-track { flex: 1; height: 3px; background: #262422; border-radius: 99px; overflow: hidden; }
+.bar-track { flex: 1; height: 3px; background: #2e2c2a; border-radius: 99px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
-.task { display: flex; align-items: flex-start; gap: 9px; padding: 5px 0; border-bottom: .5px solid #222120; cursor: pointer; user-select: none; }
+.task { display: flex; align-items: flex-start; gap: 9px; padding: 5px 0; border-bottom: .5px solid #2a2826; cursor: pointer; user-select: none; }
 .task:last-child { border-bottom: none; }
 .task.sub { padding-left: 20px; }
-.cb { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid #363330; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.cb { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid #3a3734; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
 .cb.done { border-color: transparent; }
-.cb.done::after { content: ''; width: 6px; height: 3.5px; border-left: 1.5px solid #1a1917; border-bottom: 1.5px solid #1a1917; transform: rotate(-45deg) translateY(-1px); display: block; }
+.cb.done::after { content: ''; width: 6px; height: 3.5px; border-left: 1.5px solid #191817; border-bottom: 1.5px solid #191817; transform: rotate(-45deg) translateY(-1px); display: block; }
 .task-text { font-size: 12.5px; color: #b8b2aa; line-height: 1.5; flex: 1; transition: color .15s; }
 .task-text.done { color: #363330; text-decoration: line-through; }
 .sub-toggle { font-size: 9px; color: #4e4a46; cursor: pointer; flex-shrink: 0; padding: 2px 4px; }
@@ -59,13 +59,7 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; background: t
   </div>
 </div>
 <script>
-function setBackground() {
-  try {
-    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.body.style.background = isDark ? '#191919' : '#ffffff';
-  } catch(e) { document.body.style.background = '#ffffff'; }
-}
-if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addListener(setBackground);
+function setBackground() { document.body.style.background = 'transparent'; }
 setBackground();
 const counts = {};
 function tick(el, group, total, isBoosted) {

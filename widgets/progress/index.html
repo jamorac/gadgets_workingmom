@@ -7,14 +7,14 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.w { background: #1a1917; color: #e4dfd8; border-radius: 14px; padding: 20px 18px; }
+.w { color: #e4dfd8; padding: 4px 2px; }
 .sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; }
 .arrow { font-size: 9px; color: #4e4a46; transition: transform .2s; display: inline-block; flex-shrink: 0; }
 .arrow.open { transform: rotate(90deg); }
 .collapsible { overflow: hidden; transition: max-height .35s ease; }
 .week-row { display: flex; gap: 10px; align-items: center; }
 .wday { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.wdot { width: 9px; height: 9px; border-radius: 50%; background: #2a2826; transition: background .3s; }
+.wdot { width: 9px; height: 9px; border-radius: 50%; background: #2e2c2a; transition: background .3s; }
 .wdot.done { background: #5a9a7a; }
 .wdot.today { box-shadow: 0 0 0 1.5px #5a9a7a; }
 .wdot.today.done { background: #5a9a7a; }
@@ -23,15 +23,15 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; background: t
 .month-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .month-num { font-size: 20px; font-weight: 500; color: #c8c2ba; line-height: 1; }
 .month-lbl { font-size: 9px; color: #4e4a46; text-transform: uppercase; letter-spacing: .06em; }
-.stat-row { display: flex; padding-top: 14px; border-top: .5px solid #262422; }
+.stat-row { display: flex; padding-top: 14px; border-top: .5px solid #2e2c2a; }
 .stat-cell { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.stat-cell + .stat-cell { border-left: .5px solid #262422; padding-left: 16px; }
+.stat-cell + .stat-cell { border-left: .5px solid #2e2c2a; padding-left: 16px; }
 .stat-num { font-size: 26px; font-weight: 500; color: #c8c2ba; line-height: 1; }
 .stat-lbl { font-size: 9px; color: #4e4a46; text-transform: uppercase; letter-spacing: .06em; }
 .int-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
 .goal-item { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 6px; cursor: pointer; user-select: none; }
-.goal-item:hover { background: #222120; }
-.goal-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #363330; flex-shrink: 0; transition: all .15s; }
+.goal-item:hover { background: rgba(255,255,255,.04); }
+.goal-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #3a3734; flex-shrink: 0; transition: all .15s; }
 .goal-text { font-size: 12px; color: #7a7470; transition: color .15s; }
 .goal-text.done { color: #363330; text-decoration: line-through; }
 </style>
@@ -59,7 +59,7 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; background: t
       <div class="goal-item" onclick="toggleGoal(this)"><div class="goal-dot"></div><span class="goal-text">move your body</span></div>
     </div>
   </div>
-  <div style="height:.5px;background:#262422;margin:12px 0"></div>
+  <div style="height:.5px;background:#2e2c2a;margin:12px 0"></div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
     <span class="sec-label">progress</span>
     <div class="week-row" id="week-dots"></div>
@@ -77,14 +77,7 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; background: t
   </div>
 </div>
 <script>
-function setBackground() {
-  try {
-    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.body.style.background = isDark ? '#191919' : '#ffffff';
-  } catch(e) { document.body.style.background = '#ffffff'; }
-}
-if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addListener(setBackground);
-setBackground();
+document.body.style.background = 'transparent';
 const TODAY = new Date().toDateString();
 const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 const DAYS = ['s','m','t','w','t','f','s'];
