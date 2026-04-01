@@ -6,7 +6,7 @@
 <title>brain dump</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 .w { color: #e4dfd8; padding: 4px 2px; }
 .sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; margin-bottom: 10px; }
 .task { display: flex; align-items: flex-start; gap: 9px; padding: 6px 0; border-bottom: .5px solid #2a2826; cursor: pointer; user-select: none; }
@@ -35,7 +35,19 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; background: t
   <button class="btn" onclick="loadTasks()">refresh &#8635;</button>
 </div>
 <script>
-document.body.style.background = 'transparent';
+function setBackground() {
+  try {
+    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.style.background = isDark ? '#191919' : '#ffffff';
+  } catch(e) {
+    document.body.style.background = '#ffffff';
+  }
+}
+if (window.matchMedia) {
+  window.matchMedia('(prefers-color-scheme: dark)').addListener(setBackground);
+}
+setBackground();
+
 const SKEY = 'studio_braindump_v1';
 const TODAY = new Date().toDateString();
 const TAG_COLORS = { 'low-energy':'t-low', 'quick-win':'t-quick', 'admin':'t-admin', 'creative':'t-creative' };
