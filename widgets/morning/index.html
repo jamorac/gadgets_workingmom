@@ -98,17 +98,24 @@ setBackground();
 
 const SKEY = 'studio_morning_v1';
 const TODAY = new Date().toDateString();
+
 function getState() {
   try {
     const s = JSON.parse(localStorage.getItem(SKEY) || 'null');
-    if (!s || s.date !== TODAY) return { date: TODAY, mfDone: false };
+    if (!s || s.date !== TODAY) return { date: TODAY, mfDone: false, mfCount: 0, mbCount: 0 };
+    // backfill if old format missing counts
+    if (s.mfCount === undefined) s.mfCount = s.mfDone ? 7 : 0;
+    if (s.mbCount === undefined) s.mbCount = 0;
     return s;
-  } catch(e) { return { date: TODAY, mfDone: false }; }
+  } catch(e) { return { date: TODAY, mfDone: false, mfCount: 0, mbCount: 0 }; }
 }
+
 function save(s) { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch(e) {} }
+
 const counts = {};
 const MF_TOTAL = 7;
 let mfComplete = false;
+
 function tick(el, group, total, isBoosted) {
   const cb = el.querySelector('.cb'), txt = el.querySelector('.task-text');
   if (!cb || !txt) return;
@@ -121,15 +128,23 @@ function tick(el, group, total, isBoosted) {
   const bar = document.getElementById(group + '-bar');
   if (bar) bar.style.width = pct + '%';
   if (isDone && isBoosted) sparkle(el);
+
+  // Save counts so progress widget can read them
+  const st = getState();
+  if (group === 'mf') st.mfCount = counts['mf'] || 0;
+  if (group === 'mb') st.mbCount = counts['mb'] || 0;
+
   if (group === 'mf' && counts['mf'] >= MF_TOTAL && !mfComplete) {
     mfComplete = true;
-    const st = getState(); st.mfDone = true; save(st);
+    st.mfDone = true;
     try {
       const presence = JSON.parse(localStorage.getItem('studio_presence') || '[]');
       if (!presence.includes(TODAY)) { presence.push(TODAY); localStorage.setItem('studio_presence', JSON.stringify(presence)); }
     } catch(e) {}
   }
+  save(st);
 }
+
 function sparkle(el) {
   const chars = ['&#10024;','&#11088;','&#128171;','&#10022;'];
   const rect = el.getBoundingClientRect();
@@ -143,6 +158,7 @@ function sparkle(el) {
     }, i * 100);
   }
 }
+
 function toggleSec(bodyId, arrId) {
   const body = document.getElementById(bodyId), arr = document.getElementById(arrId);
   if (!body) return;
@@ -150,6 +166,7 @@ function toggleSec(bodyId, arrId) {
   body.style.maxHeight = isOpen ? '0' : '800px';
   if (arr) arr.classList.toggle('open', !isOpen);
 }
+
 function toggleSub(id, btn) {
   const el = document.getElementById(id); if (!el) return;
   const isOpen = el.style.maxHeight !== '0px' && el.style.maxHeight !== '0';

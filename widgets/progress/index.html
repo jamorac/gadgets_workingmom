@@ -163,17 +163,36 @@ const DAYS = ['sun','mon','tue','wed','thu','fri','sat'];
 
 function getPresence() { try { return JSON.parse(localStorage.getItem('studio_presence')||'[]'); } catch(e) { return []; } }
 function getTasksDone() { try { return parseInt(localStorage.getItem('studio_tasks_done_total')||'0'); } catch(e) { return 0; } }
-function getMorningState() { try { const s = JSON.parse(localStorage.getItem('studio_morning_v1')||'null'); return s && s.date === TODAY ? s : null; } catch(e) { return null; } }
+
+function getMorningState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('studio_morning_v1')||'null');
+    if (!s || s.date !== TODAY) return { mfCount: 0, mbCount: 0, mfDone: false };
+    return {
+      mfCount: s.mfCount !== undefined ? s.mfCount : (s.mfDone ? 7 : 0),
+      mbCount: s.mbCount !== undefined ? s.mbCount : 0,
+      mfDone: !!s.mfDone
+    };
+  } catch(e) { return { mfCount: 0, mbCount: 0, mfDone: false }; }
+}
+
+function getEveningState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('studio_evening_v1')||'null');
+    if (!s || s.date !== TODAY) return { windCount: 0, unwindCount: 0 };
+    return {
+      windCount: s.windCount !== undefined ? s.windCount : 0,
+      unwindCount: s.unwindCount !== undefined ? s.unwindCount : 0
+    };
+  } catch(e) { return { windCount: 0, unwindCount: 0 }; }
+}
+
 function getIntentions() { try { const s = JSON.parse(localStorage.getItem('studio_intentions_v1')||'null'); return s && s.date === TODAY && s.selected ? s.selected : []; } catch(e) { return []; } }
 
 function togglePresence(dayStr) {
   const presence = getPresence();
   const idx = presence.indexOf(dayStr);
-  if (idx > -1) {
-    presence.splice(idx, 1);
-  } else {
-    presence.push(dayStr);
-  }
+  if (idx > -1) { presence.splice(idx, 1); } else { presence.push(dayStr); }
   try { localStorage.setItem('studio_presence', JSON.stringify(presence)); } catch(e) {}
   renderWeekGrid();
   renderMonthGrid();
@@ -206,46 +225,38 @@ function updateStats() {
 }
 
 function updateMorning() {
-  const state = getMorningState();
-  // For now just showing placeholders - morning widget would need to expose counts
-  document.getElementById('morning-wake').textContent = '0/7';
-  document.getElementById('morning-boost').textContent = '0/11';
+  const s = getMorningState();
+  document.getElementById('morning-wake').textContent = s.mfCount + '/7';
+  document.getElementById('morning-boost').textContent = s.mbCount + '/11';
 }
 
 function updateEvening() {
-  // Evening widget would need to expose counts
-  document.getElementById('evening-wind').textContent = '0/4';
-  document.getElementById('evening-unwind').textContent = '0/2';
+  const s = getEveningState();
+  document.getElementById('evening-wind').textContent = s.windCount + '/4';
+  document.getElementById('evening-unwind').textContent = s.unwindCount + '/2';
 }
 
 function updateSuper() {
-  // Would track from morning/evening boosted tasks
-  document.getElementById('super-count').textContent = '0';
+  // mbCount from morning = boosted tasks (right side of bed section)
+  const s = getMorningState();
+  document.getElementById('super-count').textContent = s.mbCount || 0;
 }
 
 function updateIntentions() {
   const intList = document.getElementById('int-list');
   const selected = getIntentions();
-  
   if (selected.length === 0) {
     intList.innerHTML = '<div class="detail-row"><span class="detail-label" style="color:#5a5652">none selected yet</span></div>';
     return;
   }
-  
   const labels = {
-    'paddy-train': 'paddy training',
-    'paddy-walk': 'paddy + noah walk',
-    'baby-activity': 'baby activity',
-    'upskill': 'upskill',
-    'friend-text': 'text a friend',
-    'smoothie': 'healthy smoothie',
-    'photo': 'take a picture',
-    'face-mask': 'face mask',
-    'hair-mask': 'hair mask',
-    'move-body': 'move your body'
+    'paddy-train': 'paddy training', 'paddy-walk': 'paddy + noah walk',
+    'baby-activity': 'baby activity', 'upskill': 'upskill',
+    'friend-text': 'text a friend', 'smoothie': 'healthy smoothie',
+    'photo': 'take a picture', 'face-mask': 'face mask',
+    'hair-mask': 'hair mask', 'move-body': 'move your body'
   };
-  
-  intList.innerHTML = selected.map(id => 
+  intList.innerHTML = selected.map(id =>
     `<div class="detail-row"><span class="detail-tag">${labels[id] || id}</span></div>`
   ).join('');
 }
@@ -257,19 +268,20 @@ function toggleSec(bodyId, arrId) {
   if (arr) arr.classList.toggle('open', !isOpen);
 }
 
-function init() {
-  renderWeekGrid();
-  renderMonthGrid();
-  updateStats();
+function refresh() {
   updateMorning();
   updateEvening();
   updateSuper();
   updateIntentions();
-  setInterval(() => { 
-    renderWeekGrid(); 
-    renderMonthGrid(); 
-    updateIntentions();
-  }, 30000);
+  renderWeekGrid();
+  renderMonthGrid();
+  updateStats();
+}
+
+function init() {
+  refresh();
+  // Poll every 10s to pick up changes from morning/evening widgets
+  setInterval(refresh, 10000);
 }
 
 init();
