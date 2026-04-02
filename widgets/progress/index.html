@@ -15,14 +15,6 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: 
 .week-day { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .week-label { font-size: 10px; color: #4e4a46; text-transform: uppercase; letter-spacing: .05em; }
 
-/* progress bars */
-.routine-section { margin-bottom: 18px; }
-.routine-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-.routine-title { font-size: 11px; color: #7a7470; }
-.routine-count { font-size: 11px; color: #5a5652; font-weight: 500; }
-.bar-track { width: 100%; height: 10px; background: #2a2826; border-radius: 99px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
-
 .divider { height: .5px; background: #2e2c2a; margin: 4px 0 18px; }
 
 /* summary section */
@@ -47,41 +39,6 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: 
 
   <div class="divider"></div>
 
-  <div class="routine-section">
-    <div class="routine-header">
-      <span class="routine-title">&#9728;&#65039; wake up</span>
-      <span class="routine-count" id="mf-count">0 / 7</span>
-    </div>
-    <div class="bar-track"><div class="bar-fill" id="mf-bar" style="background:#9a8060;width:0%"></div></div>
-  </div>
-
-  <div class="routine-section">
-    <div class="routine-header">
-      <span class="routine-title">&#127800; right side of bed</span>
-      <span class="routine-count" id="mb-count">0 / 11</span>
-    </div>
-    <div class="bar-track"><div class="bar-fill" id="mb-bar" style="background:#5a9a7a;width:0%"></div></div>
-  </div>
-
-  <div class="routine-section">
-    <div class="routine-header">
-      <span class="routine-title">&#127769; wind down</span>
-      <span class="routine-count" id="ef-count">0 / 4</span>
-    </div>
-    <div class="bar-track"><div class="bar-fill" id="ef-bar" style="background:#9a8060;width:0%"></div></div>
-  </div>
-
-  <div class="routine-section">
-    <div class="routine-header">
-      <span class="routine-title">&#127807; unwind</span>
-      <span class="routine-count" id="eb-count">0 / 2</span>
-    </div>
-    <div class="bar-track"><div class="bar-fill" id="eb-bar" style="background:#7a72c0;width:0%"></div></div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- summary: weekly / monthly / yearly -->
   <div id="summary-section">
     <div class="summary-row">
       <span class="summary-period">weekly</span>
@@ -169,7 +126,6 @@ function getEvening(dateStr) {
   } catch(e) { return { efCount: 0, ebCount: 0 }; }
 }
 
-// returns { morning: bool, night: bool } for a given dateStr
 function getDayCompletion(dateStr) {
   const m = getMorning(dateStr);
   const e = getEvening(dateStr);
@@ -221,27 +177,9 @@ function renderWeekGrid() {
   }).join('');
 }
 
-function renderBars() {
-  const m = getMorning(TODAY);
-  const e = getEvening(TODAY);
-
-  document.getElementById('mf-count').textContent = m.mfCount + ' / ' + MF_TOTAL;
-  document.getElementById('mf-bar').style.width = Math.min(100, Math.round(m.mfCount / MF_TOTAL * 100)) + '%';
-
-  document.getElementById('mb-count').textContent = m.mbCount + ' / ' + MB_TOTAL;
-  document.getElementById('mb-bar').style.width = Math.min(100, Math.round(m.mbCount / MB_TOTAL * 100)) + '%';
-
-  document.getElementById('ef-count').textContent = e.efCount + ' / ' + EF_TOTAL;
-  document.getElementById('ef-bar').style.width = Math.min(100, Math.round(e.efCount / EF_TOTAL * 100)) + '%';
-
-  document.getElementById('eb-count').textContent = e.ebCount + ' / ' + EB_TOTAL;
-  document.getElementById('eb-bar').style.width = Math.min(100, Math.round(e.ebCount / EB_TOTAL * 100)) + '%';
-}
-
 function getDateRange(type) {
   const now = new Date();
   const dates = [];
-
   if (type === 'week') {
     const dow = now.getDay();
     for (let i = 0; i < 7; i++) {
@@ -252,16 +190,12 @@ function getDateRange(type) {
   } else if (type === 'month') {
     const y = now.getFullYear(), mo = now.getMonth();
     const daysInMonth = new Date(y, mo + 1, 0).getDate();
-    for (let i = 1; i <= daysInMonth; i++) {
-      dates.push(new Date(y, mo, i).toDateString());
-    }
+    for (let i = 1; i <= daysInMonth; i++) dates.push(new Date(y, mo, i).toDateString());
   } else if (type === 'year') {
     const y = now.getFullYear();
     for (let mo = 0; mo < 12; mo++) {
       const daysInMonth = new Date(y, mo + 1, 0).getDate();
-      for (let i = 1; i <= daysInMonth; i++) {
-        dates.push(new Date(y, mo, i).toDateString());
-      }
+      for (let i = 1; i <= daysInMonth; i++) dates.push(new Date(y, mo, i).toDateString());
     }
   }
   return dates;
@@ -281,8 +215,7 @@ function renderSummary() {
   const periods = ['week', 'month', 'year'];
   const ids = { week: 'w', month: 'm', year: 'y' };
   for (const p of periods) {
-    const dates = getDateRange(p);
-    const { morning, night } = countCompletions(dates);
+    const { morning, night } = countCompletions(getDateRange(p));
     document.getElementById(ids[p] + '-morning').textContent = morning;
     document.getElementById(ids[p] + '-night').textContent = night;
   }
@@ -290,7 +223,6 @@ function renderSummary() {
 
 function refresh() {
   renderWeekGrid();
-  renderBars();
   renderSummary();
 }
 
