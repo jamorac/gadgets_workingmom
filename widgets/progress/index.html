@@ -24,6 +24,20 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: 
 .bar-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
 
 .divider { height: .5px; background: #2e2c2a; margin: 4px 0 18px; }
+
+/* summary section */
+.summary-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.summary-period { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: #4e4a46; width: 44px; flex-shrink: 0; padding-top: 2px; }
+.summary-counts { display: flex; gap: 0; align-items: baseline; flex: 1; }
+.summary-num { font-size: 20px; font-weight: 600; line-height: 1; }
+.summary-num.morning { color: #9a8060; }
+.summary-num.night { color: #7a72c0; }
+.summary-sep { font-size: 14px; color: #3a3734; margin: 0 6px; line-height: 1; }
+.summary-sub { display: flex; gap: 0; align-items: center; font-size: 9px; color: #4e4a46; letter-spacing: .05em; margin-top: 2px; }
+.summary-sub-morning { color: #5a4a36; }
+.summary-sub-night { color: #4a4276; }
+.summary-sub-sep { color: #2e2c2a; margin: 0 6px; }
+.summary-col { display: flex; flex-direction: column; gap: 2px; }
 </style>
 </head>
 <body>
@@ -64,6 +78,59 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: 
     </div>
     <div class="bar-track"><div class="bar-fill" id="eb-bar" style="background:#7a72c0;width:0%"></div></div>
   </div>
+
+  <div class="divider"></div>
+
+  <!-- summary: weekly / monthly / yearly -->
+  <div id="summary-section">
+    <div class="summary-row">
+      <span class="summary-period">weekly</span>
+      <div class="summary-col">
+        <div class="summary-counts">
+          <span class="summary-num morning" id="w-morning">0</span>
+          <span class="summary-sep">|</span>
+          <span class="summary-num night" id="w-night">0</span>
+        </div>
+        <div class="summary-sub">
+          <span class="summary-sub-morning">morning</span>
+          <span class="summary-sub-sep">|</span>
+          <span class="summary-sub-night">night</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-row">
+      <span class="summary-period">monthly</span>
+      <div class="summary-col">
+        <div class="summary-counts">
+          <span class="summary-num morning" id="m-morning">0</span>
+          <span class="summary-sep">|</span>
+          <span class="summary-num night" id="m-night">0</span>
+        </div>
+        <div class="summary-sub">
+          <span class="summary-sub-morning">morning</span>
+          <span class="summary-sub-sep">|</span>
+          <span class="summary-sub-night">night</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-row">
+      <span class="summary-period">yearly</span>
+      <div class="summary-col">
+        <div class="summary-counts">
+          <span class="summary-num morning" id="y-morning">0</span>
+          <span class="summary-sep">|</span>
+          <span class="summary-num night" id="y-night">0</span>
+        </div>
+        <div class="summary-sub">
+          <span class="summary-sub-morning">morning</span>
+          <span class="summary-sub-sep">|</span>
+          <span class="summary-sub-night">night</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -79,9 +146,6 @@ setBackground();
 const TODAY = new Date().toDateString();
 const DAYS = ['sun','mon','tue','wed','thu','fri','sat'];
 const MF_TOTAL = 7, MB_TOTAL = 11, EF_TOTAL = 4, EB_TOTAL = 2;
-const MORNING_TOTAL = MF_TOTAL; // morning completion = wake up done
-const EVENING_TOTAL = EF_TOTAL + EB_TOTAL; // 6 total evening tasks
-const ALL_TOTAL = MF_TOTAL + MB_TOTAL + EF_TOTAL + EB_TOTAL; // 24
 
 function getMorning(dateStr) {
   try {
@@ -105,13 +169,22 @@ function getEvening(dateStr) {
   } catch(e) { return { efCount: 0, ebCount: 0 }; }
 }
 
+// returns { morning: bool, night: bool } for a given dateStr
+function getDayCompletion(dateStr) {
+  const m = getMorning(dateStr);
+  const e = getEvening(dateStr);
+  return {
+    morning: (m.mfCount + m.mbCount) > 0,
+    night: (e.efCount + e.ebCount) > 0
+  };
+}
+
 function getDotState(dateStr) {
   const isToday = dateStr === TODAY;
   const m = getMorning(dateStr);
   const e = getEvening(dateStr);
   const totalDone = m.mfCount + m.mbCount + e.efCount + e.ebCount;
   const allDone = m.mfCount >= MF_TOTAL && m.mbCount >= MB_TOTAL && e.efCount >= EF_TOTAL && e.ebCount >= EB_TOTAL;
-  const morningDone = m.mfCount >= MF_TOTAL;
 
   if (allDone) return 'complete';
   if (isToday && totalDone > 0) return 'inprogress';
@@ -132,7 +205,6 @@ function renderDot(state, isToday) {
   if (state === 'partial') {
     return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#a8d4a5" stroke-width="1.5"/><circle cx="${r}" cy="${r}" r="5" fill="#a8d4a5"/>${todayRing}</svg>`;
   }
-  // complete
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r}" fill="#5a9a7a"/>${todayRing}</svg>`;
 }
 
@@ -166,9 +238,60 @@ function renderBars() {
   document.getElementById('eb-bar').style.width = Math.min(100, Math.round(e.ebCount / EB_TOTAL * 100)) + '%';
 }
 
+function getDateRange(type) {
+  const now = new Date();
+  const dates = [];
+
+  if (type === 'week') {
+    const dow = now.getDay();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - dow + i);
+      dates.push(d.toDateString());
+    }
+  } else if (type === 'month') {
+    const y = now.getFullYear(), mo = now.getMonth();
+    const daysInMonth = new Date(y, mo + 1, 0).getDate();
+    for (let i = 1; i <= daysInMonth; i++) {
+      dates.push(new Date(y, mo, i).toDateString());
+    }
+  } else if (type === 'year') {
+    const y = now.getFullYear();
+    for (let mo = 0; mo < 12; mo++) {
+      const daysInMonth = new Date(y, mo + 1, 0).getDate();
+      for (let i = 1; i <= daysInMonth; i++) {
+        dates.push(new Date(y, mo, i).toDateString());
+      }
+    }
+  }
+  return dates;
+}
+
+function countCompletions(dates) {
+  let morning = 0, night = 0;
+  for (const ds of dates) {
+    const c = getDayCompletion(ds);
+    if (c.morning) morning++;
+    if (c.night) night++;
+  }
+  return { morning, night };
+}
+
+function renderSummary() {
+  const periods = ['week', 'month', 'year'];
+  const ids = { week: 'w', month: 'm', year: 'y' };
+  for (const p of periods) {
+    const dates = getDateRange(p);
+    const { morning, night } = countCompletions(dates);
+    document.getElementById(ids[p] + '-morning').textContent = morning;
+    document.getElementById(ids[p] + '-night').textContent = night;
+  }
+}
+
 function refresh() {
   renderWeekGrid();
   renderBars();
+  renderSummary();
 }
 
 refresh();
