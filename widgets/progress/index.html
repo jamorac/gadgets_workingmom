@@ -9,27 +9,20 @@
 html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 .w { color: #e4dfd8; padding: 4px 2px; }
 .sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; margin-bottom: 12px; }
-
-/* week grid */
 .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
 .week-day { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .week-label { font-size: 10px; color: #4e4a46; text-transform: uppercase; letter-spacing: .05em; }
-
-.divider { height: .5px; background: #2e2c2a; margin: 4px 0 18px; }
-
-/* summary section */
-.summary-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
-.summary-period { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: #4e4a46; width: 44px; flex-shrink: 0; padding-top: 2px; }
-.summary-counts { display: flex; gap: 0; align-items: baseline; flex: 1; }
-.summary-num { font-size: 20px; font-weight: 600; line-height: 1; }
-.summary-num.morning { color: #9a8060; }
-.summary-num.night { color: #7a72c0; }
-.summary-sep { font-size: 14px; color: #3a3734; margin: 0 6px; line-height: 1; }
-.summary-sub { display: flex; gap: 0; align-items: center; font-size: 9px; color: #4e4a46; letter-spacing: .05em; margin-top: 2px; }
-.summary-sub-morning { color: #5a4a36; }
-.summary-sub-night { color: #4a4276; }
-.summary-sub-sep { color: #2e2c2a; margin: 0 6px; }
-.summary-col { display: flex; flex-direction: column; gap: 2px; }
+.divider { height: .5px; background: #2e2c2a; margin: 4px 0 14px; }
+.summary-row { display: grid; grid-template-columns: 52px 1fr 1fr; align-items: center; margin-bottom: 10px; }
+.summary-row:last-child { margin-bottom: 0; }
+.summary-period { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #3a3836; }
+.summary-cell { display: flex; flex-direction: column; align-items: center; }
+.summary-num { font-size: 22px; font-weight: 600; line-height: 1; }
+.summary-num.m { color: #c49a60; }
+.summary-num.n { color: #8a7fcc; }
+.summary-tag { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
+.summary-tag.m { color: #5a4030; }
+.summary-tag.n { color: #42386a; }
 </style>
 </head>
 <body>
@@ -41,50 +34,25 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: 
 
   <div id="summary-section">
     <div class="summary-row">
-      <span class="summary-period">weekly</span>
-      <div class="summary-col">
-        <div class="summary-counts">
-          <span class="summary-num morning" id="w-morning">0</span>
-          <span class="summary-sep">|</span>
-          <span class="summary-num night" id="w-night">0</span>
-        </div>
-        <div class="summary-sub">
-          <span class="summary-sub-morning">morning</span>
-          <span class="summary-sub-sep">|</span>
-          <span class="summary-sub-night">night</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="summary-row">
       <span class="summary-period">monthly</span>
-      <div class="summary-col">
-        <div class="summary-counts">
-          <span class="summary-num morning" id="m-morning">0</span>
-          <span class="summary-sep">|</span>
-          <span class="summary-num night" id="m-night">0</span>
-        </div>
-        <div class="summary-sub">
-          <span class="summary-sub-morning">morning</span>
-          <span class="summary-sub-sep">|</span>
-          <span class="summary-sub-night">night</span>
-        </div>
+      <div class="summary-cell">
+        <span class="summary-num m" id="m-morning">0</span>
+        <span class="summary-tag m">morning</span>
+      </div>
+      <div class="summary-cell">
+        <span class="summary-num n" id="m-night">0</span>
+        <span class="summary-tag n">night</span>
       </div>
     </div>
-
     <div class="summary-row">
       <span class="summary-period">yearly</span>
-      <div class="summary-col">
-        <div class="summary-counts">
-          <span class="summary-num morning" id="y-morning">0</span>
-          <span class="summary-sep">|</span>
-          <span class="summary-num night" id="y-night">0</span>
-        </div>
-        <div class="summary-sub">
-          <span class="summary-sub-morning">morning</span>
-          <span class="summary-sub-sep">|</span>
-          <span class="summary-sub-night">night</span>
-        </div>
+      <div class="summary-cell">
+        <span class="summary-num m" id="y-morning">0</span>
+        <span class="summary-tag m">morning</span>
+      </div>
+      <div class="summary-cell">
+        <span class="summary-num n" id="y-night">0</span>
+        <span class="summary-tag n">night</span>
       </div>
     </div>
   </div>
@@ -141,7 +109,6 @@ function getDotState(dateStr) {
   const e = getEvening(dateStr);
   const totalDone = m.mfCount + m.mbCount + e.efCount + e.ebCount;
   const allDone = m.mfCount >= MF_TOTAL && m.mbCount >= MB_TOTAL && e.efCount >= EF_TOTAL && e.ebCount >= EB_TOTAL;
-
   if (allDone) return 'complete';
   if (isToday && totalDone > 0) return 'inprogress';
   if (!isToday && totalDone > 0) return 'partial';
@@ -151,16 +118,9 @@ function getDotState(dateStr) {
 function renderDot(state, isToday) {
   const size = 16, r = size / 2;
   const todayRing = isToday ? `<circle cx="${r}" cy="${r}" r="${r - 1}" fill="none" stroke="#4e4a46" stroke-width="1" stroke-dasharray="2 2"/>` : '';
-
-  if (state === 'nothing') {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#3a3734" stroke-width="1.5"/>${todayRing}</svg>`;
-  }
-  if (state === 'inprogress') {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#e8a838" stroke-width="1.5"/><circle cx="${r}" cy="${r}" r="4" fill="#e8a838"/>${todayRing}</svg>`;
-  }
-  if (state === 'partial') {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#a8d4a5" stroke-width="1.5"/><circle cx="${r}" cy="${r}" r="5" fill="#a8d4a5"/>${todayRing}</svg>`;
-  }
+  if (state === 'nothing') return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#3a3734" stroke-width="1.5"/>${todayRing}</svg>`;
+  if (state === 'inprogress') return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#e8a838" stroke-width="1.5"/><circle cx="${r}" cy="${r}" r="4" fill="#e8a838"/>${todayRing}</svg>`;
+  if (state === 'partial') return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#a8d4a5" stroke-width="1.5"/><circle cx="${r}" cy="${r}" r="5" fill="#a8d4a5"/>${todayRing}</svg>`;
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r}" fill="#5a9a7a"/>${todayRing}</svg>`;
 }
 
@@ -180,14 +140,7 @@ function renderWeekGrid() {
 function getDateRange(type) {
   const now = new Date();
   const dates = [];
-  if (type === 'week') {
-    const dow = now.getDay();
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - dow + i);
-      dates.push(d.toDateString());
-    }
-  } else if (type === 'month') {
+  if (type === 'month') {
     const y = now.getFullYear(), mo = now.getMonth();
     const daysInMonth = new Date(y, mo + 1, 0).getDate();
     for (let i = 1; i <= daysInMonth; i++) dates.push(new Date(y, mo, i).toDateString());
@@ -212,13 +165,12 @@ function countCompletions(dates) {
 }
 
 function renderSummary() {
-  const periods = ['week', 'month', 'year'];
-  const ids = { week: 'w', month: 'm', year: 'y' };
-  for (const p of periods) {
+  ['month', 'year'].forEach(p => {
+    const id = p === 'month' ? 'm' : 'y';
     const { morning, night } = countCompletions(getDateRange(p));
-    document.getElementById(ids[p] + '-morning').textContent = morning;
-    document.getElementById(ids[p] + '-night').textContent = night;
-  }
+    document.getElementById(id + '-morning').textContent = morning;
+    document.getElementById(id + '-night').textContent = night;
+  });
 }
 
 function refresh() {
