@@ -8,283 +8,171 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 .w { color: #e4dfd8; padding: 4px 2px; }
-.sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; }
-.arrow { font-size: 9px; color: #4e4a46; transition: transform .2s; display: inline-block; flex-shrink: 0; }
-.arrow.open { transform: rotate(90deg); }
-.collapsible { overflow: hidden; transition: max-height .35s ease; }
+.sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; margin-bottom: 12px; }
 
-/* Weekly Section - Prominent */
-.week-section { margin-bottom: 20px; }
-.week-header { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
-.week-emoji { font-size: 13px; }
-.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+/* week grid */
+.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
 .week-day { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.week-dot { width: 16px; height: 16px; border-radius: 50%; background: #2e2c2a; transition: all .3s; cursor: pointer; }
-.week-dot:hover { background: #3a3734; }
-.week-dot.done { background: #5a9a7a; }
-.week-dot.today { box-shadow: 0 0 0 2px #5a9a7a; }
-.week-dot.today.done { background: #5a9a7a; }
-.week-label { font-size: 10px; color: #4e4a46; text-transform: uppercase; letter-spacing: .05em; font-weight: 500; }
+.week-label { font-size: 10px; color: #4e4a46; text-transform: uppercase; letter-spacing: .05em; }
 
-/* Details Sections */
-.detail-section { margin-bottom: 16px; }
-.detail-header { display: flex; align-items: center; gap: 7px; cursor: pointer; margin-bottom: 6px; }
-.detail-title { font-size: 11px; color: #7a7470; }
-.detail-content { padding-left: 16px; }
-.detail-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; font-size: 11px; color: #5a5652; }
-.detail-label { color: #4e4a46; }
-.detail-value { color: #8a8480; font-weight: 500; }
-.detail-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 9px; background: rgba(90, 154, 122, .15); color: #5a9a7a; }
+/* progress bars */
+.routine-section { margin-bottom: 18px; }
+.routine-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.routine-title { font-size: 11px; color: #7a7470; }
+.routine-count { font-size: 11px; color: #5a5652; font-weight: 500; }
+.bar-track { width: 100%; height: 10px; background: #2a2826; border-radius: 99px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
 
-/* Stats Section */
-.month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 14px; }
-.month-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.month-num { font-size: 20px; font-weight: 500; color: #c8c2ba; line-height: 1; }
-.month-lbl { font-size: 9px; color: #4e4a46; text-transform: uppercase; letter-spacing: .06em; }
-.stat-row { display: flex; padding-top: 14px; border-top: .5px solid #2e2c2a; }
-.stat-cell { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.stat-cell + .stat-cell { border-left: .5px solid #2e2c2a; padding-left: 16px; }
-.stat-num { font-size: 26px; font-weight: 500; color: #c8c2ba; line-height: 1; }
-.stat-lbl { font-size: 9px; color: #4e4a46; text-transform: uppercase; letter-spacing: .06em; }
-
-.divider { height: .5px; background: #2e2c2a; margin: 16px 0; }
+.divider { height: .5px; background: #2e2c2a; margin: 4px 0 18px; }
 </style>
 </head>
 <body>
 <div class="w">
-  <div class="week-section">
-    <div class="week-header">
-      <span class="week-emoji">◉</span>
-      <span class="sec-label" style="margin:0">this week</span>
-    </div>
-    <div class="week-grid" id="week-grid"></div>
-  </div>
+  <p class="sec-label">this week's progress</p>
+  <div class="week-grid" id="week-grid"></div>
 
   <div class="divider"></div>
 
-  <div class="detail-section">
-    <div class="detail-header" onclick="toggleSec('morning-body','morning-arr')">
-      <span class="arrow" id="morning-arr">▸</span>
-      <span class="detail-title">☀️ morning</span>
+  <div class="routine-section">
+    <div class="routine-header">
+      <span class="routine-title">&#9728;&#65039; wake up</span>
+      <span class="routine-count" id="mf-count">0 / 7</span>
     </div>
-    <div class="collapsible" id="morning-body" style="max-height:0">
-      <div class="detail-content">
-        <div class="detail-row">
-          <span class="detail-label">wake up</span>
-          <span class="detail-value" id="morning-wake">0/7</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">right side of bed</span>
-          <span class="detail-value" id="morning-boost">0/11</span>
-        </div>
-      </div>
-    </div>
+    <div class="bar-track"><div class="bar-fill" id="mf-bar" style="background:#9a8060;width:0%"></div></div>
   </div>
 
-  <div class="detail-section">
-    <div class="detail-header" onclick="toggleSec('evening-body','evening-arr')">
-      <span class="arrow" id="evening-arr">▸</span>
-      <span class="detail-title">🌙 evening</span>
+  <div class="routine-section">
+    <div class="routine-header">
+      <span class="routine-title">&#127800; right side of bed</span>
+      <span class="routine-count" id="mb-count">0 / 11</span>
     </div>
-    <div class="collapsible" id="evening-body" style="max-height:0">
-      <div class="detail-content">
-        <div class="detail-row">
-          <span class="detail-label">wind down</span>
-          <span class="detail-value" id="evening-wind">0/4</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">unwind</span>
-          <span class="detail-value" id="evening-unwind">0/2</span>
-        </div>
-      </div>
-    </div>
+    <div class="bar-track"><div class="bar-fill" id="mb-bar" style="background:#5a9a7a;width:0%"></div></div>
   </div>
 
-  <div class="detail-section">
-    <div class="detail-header" onclick="toggleSec('super-body','super-arr')">
-      <span class="arrow" id="super-arr">▸</span>
-      <span class="detail-title">✨ supercharged</span>
+  <div class="routine-section">
+    <div class="routine-header">
+      <span class="routine-title">&#127769; wind down</span>
+      <span class="routine-count" id="ef-count">0 / 4</span>
     </div>
-    <div class="collapsible" id="super-body" style="max-height:0">
-      <div class="detail-content">
-        <div class="detail-row">
-          <span class="detail-label">boosted tasks done today</span>
-          <span class="detail-value" id="super-count">0</span>
-        </div>
-      </div>
-    </div>
+    <div class="bar-track"><div class="bar-fill" id="ef-bar" style="background:#9a8060;width:0%"></div></div>
   </div>
 
-  <div class="detail-section">
-    <div class="detail-header" onclick="toggleSec('int-body','int-arr')">
-      <span class="arrow" id="int-arr">▸</span>
-      <span class="detail-title">✦ intentions</span>
+  <div class="routine-section">
+    <div class="routine-header">
+      <span class="routine-title">&#127807; unwind</span>
+      <span class="routine-count" id="eb-count">0 / 2</span>
     </div>
-    <div class="collapsible" id="int-body" style="max-height:0">
-      <div class="detail-content" id="int-list">
-        <div class="detail-row">
-          <span class="detail-label" style="color:#5a5652">none selected yet</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div style="display:flex;align-items:center;gap:7px;cursor:pointer;margin-bottom:8px" onclick="toggleSec('stats-body','stats-arr')">
-    <span class="arrow" id="stats-arr">▸</span>
-    <span class="sec-label" style="margin:0">yearly stats</span>
-  </div>
-  <div class="collapsible" id="stats-body" style="max-height:0;margin-top:10px">
-    <div class="month-grid" id="month-grid"></div>
-    <div class="stat-row">
-      <div class="stat-cell"><span class="stat-num" id="tasks-num">0</span><span class="stat-lbl">tasks done in 2026</span></div>
-      <div class="stat-cell" style="padding-left:16px"><span class="stat-num" id="mornings-num">0</span><span class="stat-lbl">mornings in 2026</span></div>
-    </div>
+    <div class="bar-track"><div class="bar-fill" id="eb-bar" style="background:#7a72c0;width:0%"></div></div>
   </div>
 </div>
+
 <script>
 function setBackground() {
   try {
     const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.body.style.background = isDark ? '#191919' : '#ffffff';
-  } catch(e) {
-    document.body.style.background = '#ffffff';
-  }
+  } catch(e) { document.body.style.background = '#ffffff'; }
 }
-if (window.matchMedia) {
-  window.matchMedia('(prefers-color-scheme: dark)').addListener(setBackground);
-}
+if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addListener(setBackground);
 setBackground();
 
 const TODAY = new Date().toDateString();
-const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 const DAYS = ['sun','mon','tue','wed','thu','fri','sat'];
+const MF_TOTAL = 7, MB_TOTAL = 11, EF_TOTAL = 4, EB_TOTAL = 2;
+const MORNING_TOTAL = MF_TOTAL; // morning completion = wake up done
+const EVENING_TOTAL = EF_TOTAL + EB_TOTAL; // 6 total evening tasks
+const ALL_TOTAL = MF_TOTAL + MB_TOTAL + EF_TOTAL + EB_TOTAL; // 24
 
-function getPresence() { try { return JSON.parse(localStorage.getItem('studio_presence')||'[]'); } catch(e) { return []; } }
-function getTasksDone() { try { return parseInt(localStorage.getItem('studio_tasks_done_total')||'0'); } catch(e) { return 0; } }
-
-function getMorningState() {
+function getMorning(dateStr) {
   try {
-    const s = JSON.parse(localStorage.getItem('studio_morning_v1')||'null');
-    if (!s || s.date !== TODAY) return { mfCount: 0, mbCount: 0, mfDone: false };
+    const s = JSON.parse(localStorage.getItem('studio_morning_v1') || 'null');
+    if (!s || s.date !== dateStr) return { mfCount: 0, mbCount: 0 };
     return {
       mfCount: s.mfCount !== undefined ? s.mfCount : (s.mfDone ? 7 : 0),
-      mbCount: s.mbCount !== undefined ? s.mbCount : 0,
-      mfDone: !!s.mfDone
+      mbCount: s.mbCount !== undefined ? s.mbCount : 0
     };
-  } catch(e) { return { mfCount: 0, mbCount: 0, mfDone: false }; }
+  } catch(e) { return { mfCount: 0, mbCount: 0 }; }
 }
 
-function getEveningState() {
+function getEvening(dateStr) {
   try {
-    const s = JSON.parse(localStorage.getItem('studio_evening_v1')||'null');
-    if (!s || s.date !== TODAY) return { windCount: 0, unwindCount: 0 };
+    const s = JSON.parse(localStorage.getItem('studio_evening_v1') || 'null');
+    if (!s || s.date !== dateStr) return { efCount: 0, ebCount: 0 };
     return {
-      windCount: s.windCount !== undefined ? s.windCount : 0,
-      unwindCount: s.unwindCount !== undefined ? s.unwindCount : 0
+      efCount: s.efCount !== undefined ? s.efCount : 0,
+      ebCount: s.ebCount !== undefined ? s.ebCount : 0
     };
-  } catch(e) { return { windCount: 0, unwindCount: 0 }; }
+  } catch(e) { return { efCount: 0, ebCount: 0 }; }
 }
 
-function getIntentions() { try { const s = JSON.parse(localStorage.getItem('studio_intentions_v1')||'null'); return s && s.date === TODAY && s.selected ? s.selected : []; } catch(e) { return []; } }
+function getDotState(dateStr) {
+  const isToday = dateStr === TODAY;
+  const m = getMorning(dateStr);
+  const e = getEvening(dateStr);
+  const totalDone = m.mfCount + m.mbCount + e.efCount + e.ebCount;
+  const allDone = m.mfCount >= MF_TOTAL && m.mbCount >= MB_TOTAL && e.efCount >= EF_TOTAL && e.ebCount >= EB_TOTAL;
+  const morningDone = m.mfCount >= MF_TOTAL;
 
-function togglePresence(dayStr) {
-  const presence = getPresence();
-  const idx = presence.indexOf(dayStr);
-  if (idx > -1) { presence.splice(idx, 1); } else { presence.push(dayStr); }
-  try { localStorage.setItem('studio_presence', JSON.stringify(presence)); } catch(e) {}
-  renderWeekGrid();
-  renderMonthGrid();
-  updateStats();
+  if (allDone) return 'complete';
+  if (isToday && totalDone > 0) return 'inprogress';
+  if (!isToday && totalDone > 0) return 'partial';
+  return 'nothing';
+}
+
+function renderDot(state, isToday) {
+  const size = 16, r = size / 2;
+  const todayRing = isToday ? `<circle cx="${r}" cy="${r}" r="${r - 1}" fill="none" stroke="#4e4a46" stroke-width="1" stroke-dasharray="2 2"/>` : '';
+
+  if (state === 'nothing') {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#3a3734" stroke-width="1.5"/>${todayRing}</svg>`;
+  }
+  if (state === 'inprogress') {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#e8a838" stroke-width="1.5"/><circle cx="${r}" cy="${r}" r="4" fill="#e8a838"/>${todayRing}</svg>`;
+  }
+  if (state === 'partial') {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r - 1.5}" fill="none" stroke="#a8d4a5" stroke-width="1.5"/><circle cx="${r}" cy="${r}" r="5" fill="#a8d4a5"/>${todayRing}</svg>`;
+  }
+  // complete
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${r}" cy="${r}" r="${r}" fill="#5a9a7a"/>${todayRing}</svg>`;
 }
 
 function renderWeekGrid() {
   const el = document.getElementById('week-grid'); if (!el) return;
-  const now = new Date(), presence = getPresence(), todayDow = now.getDay();
-  el.innerHTML = DAYS.map((d,i) => {
-    const day = new Date(now); day.setDate(now.getDate() - todayDow + i);
-    const ds = day.toDateString(), isToday = ds === TODAY, done = presence.includes(ds);
-    return `<div class="week-day"><div class="week-dot${done?' done':''}${isToday?' today':''}" onclick="togglePresence('${ds}')"></div><span class="week-label">${d}</span></div>`;
+  const now = new Date(), todayDow = now.getDay();
+  el.innerHTML = DAYS.map((d, i) => {
+    const day = new Date(now);
+    day.setDate(now.getDate() - todayDow + i);
+    const ds = day.toDateString();
+    const isToday = ds === TODAY;
+    const state = getDotState(ds);
+    return `<div class="week-day">${renderDot(state, isToday)}<span class="week-label" style="color:${isToday ? '#8a8480' : '#4e4a46'}">${d}</span></div>`;
   }).join('');
 }
 
-function renderMonthGrid() {
-  const el = document.getElementById('month-grid'); if (!el) return;
-  const now = new Date(), presence = getPresence(); let html = '';
-  for (let m = 0; m <= now.getMonth(); m++) {
-    const count = presence.filter(d => { const dd = new Date(d); return dd.getFullYear()===2026 && dd.getMonth()===m; }).length;
-    html += `<div class="month-cell"><span class="month-num">${count}</span><span class="month-lbl">${MONTHS[m]}</span></div>`;
-  }
-  el.innerHTML = html;
-}
+function renderBars() {
+  const m = getMorning(TODAY);
+  const e = getEvening(TODAY);
 
-function updateStats() {
-  document.getElementById('tasks-num').textContent = getTasksDone();
-  document.getElementById('mornings-num').textContent = getPresence().filter(d => d.includes('2026')).length;
-}
+  document.getElementById('mf-count').textContent = m.mfCount + ' / ' + MF_TOTAL;
+  document.getElementById('mf-bar').style.width = Math.min(100, Math.round(m.mfCount / MF_TOTAL * 100)) + '%';
 
-function updateMorning() {
-  const s = getMorningState();
-  document.getElementById('morning-wake').textContent = s.mfCount + '/7';
-  document.getElementById('morning-boost').textContent = s.mbCount + '/11';
-}
+  document.getElementById('mb-count').textContent = m.mbCount + ' / ' + MB_TOTAL;
+  document.getElementById('mb-bar').style.width = Math.min(100, Math.round(m.mbCount / MB_TOTAL * 100)) + '%';
 
-function updateEvening() {
-  const s = getEveningState();
-  document.getElementById('evening-wind').textContent = s.windCount + '/4';
-  document.getElementById('evening-unwind').textContent = s.unwindCount + '/2';
-}
+  document.getElementById('ef-count').textContent = e.efCount + ' / ' + EF_TOTAL;
+  document.getElementById('ef-bar').style.width = Math.min(100, Math.round(e.efCount / EF_TOTAL * 100)) + '%';
 
-function updateSuper() {
-  // mbCount from morning = boosted tasks (right side of bed section)
-  const s = getMorningState();
-  document.getElementById('super-count').textContent = s.mbCount || 0;
-}
-
-function updateIntentions() {
-  const intList = document.getElementById('int-list');
-  const selected = getIntentions();
-  if (selected.length === 0) {
-    intList.innerHTML = '<div class="detail-row"><span class="detail-label" style="color:#5a5652">none selected yet</span></div>';
-    return;
-  }
-  const labels = {
-    'paddy-train': 'paddy training', 'paddy-walk': 'paddy + noah walk',
-    'baby-activity': 'baby activity', 'upskill': 'upskill',
-    'friend-text': 'text a friend', 'smoothie': 'healthy smoothie',
-    'photo': 'take a picture', 'face-mask': 'face mask',
-    'hair-mask': 'hair mask', 'move-body': 'move your body'
-  };
-  intList.innerHTML = selected.map(id =>
-    `<div class="detail-row"><span class="detail-tag">${labels[id] || id}</span></div>`
-  ).join('');
-}
-
-function toggleSec(bodyId, arrId) {
-  const body = document.getElementById(bodyId), arr = document.getElementById(arrId); if (!body) return;
-  const isOpen = body.style.maxHeight !== '0px' && body.style.maxHeight !== '0';
-  body.style.maxHeight = isOpen ? '0' : '600px';
-  if (arr) arr.classList.toggle('open', !isOpen);
+  document.getElementById('eb-count').textContent = e.ebCount + ' / ' + EB_TOTAL;
+  document.getElementById('eb-bar').style.width = Math.min(100, Math.round(e.ebCount / EB_TOTAL * 100)) + '%';
 }
 
 function refresh() {
-  updateMorning();
-  updateEvening();
-  updateSuper();
-  updateIntentions();
   renderWeekGrid();
-  renderMonthGrid();
-  updateStats();
+  renderBars();
 }
 
-function init() {
-  refresh();
-  // Poll every 10s to pick up changes from morning/evening widgets
-  setInterval(refresh, 10000);
-}
-
-init();
+refresh();
+setInterval(refresh, 10000);
 </script>
 </body>
 </html>

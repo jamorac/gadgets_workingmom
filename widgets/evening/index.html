@@ -63,16 +63,27 @@ function setBackground() {
   try {
     const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.body.style.background = isDark ? '#191919' : '#ffffff';
-  } catch(e) {
-    document.body.style.background = '#ffffff';
-  }
+  } catch(e) { document.body.style.background = '#ffffff'; }
 }
-if (window.matchMedia) {
-  window.matchMedia('(prefers-color-scheme: dark)').addListener(setBackground);
-}
+if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addListener(setBackground);
 setBackground();
 
+const SKEY = 'studio_evening_v1';
+const TODAY = new Date().toDateString();
+
+function getState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SKEY) || 'null');
+    if (!s || s.date !== TODAY) return { date: TODAY, efCount: 0, ebCount: 0 };
+    if (s.efCount === undefined) s.efCount = 0;
+    if (s.ebCount === undefined) s.ebCount = 0;
+    return s;
+  } catch(e) { return { date: TODAY, efCount: 0, ebCount: 0 }; }
+}
+function save(s) { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch(e) {} }
+
 const counts = {};
+
 function tick(el, group, total, isBoosted) {
   const cb = el.querySelector('.cb'), txt = el.querySelector('.task-text');
   if (!cb || !txt) return;
@@ -85,7 +96,13 @@ function tick(el, group, total, isBoosted) {
   const bar = document.getElementById(group + '-bar');
   if (bar) bar.style.width = pct + '%';
   if (isDone && isBoosted) sparkle(el);
+
+  const st = getState();
+  if (group === 'ef') st.efCount = counts['ef'] || 0;
+  if (group === 'eb') st.ebCount = counts['eb'] || 0;
+  save(st);
 }
+
 function sparkle(el) {
   const chars = ['&#10024;','&#127769;','&#128171;','&#10022;'];
   const rect = el.getBoundingClientRect();
