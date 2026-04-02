@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>read</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #191919;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'DM Mono', monospace;
+}
+.w {
+  background: #191919;
+  border-radius: 16px;
+  padding: 24px 26px;
+  width: 100%;
+  max-width: 460px;
+}
+.wtitle {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: #e8e0d4;
+  margin-bottom: 3px;
+}
+.wsub {
+  font-size: 11px;
+  color: #6a6460;
+  margin-bottom: 18px;
+  letter-spacing: 0.04em;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #2a2a2a;
+  border: 0.5px solid #3d3d3a;
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #8db89a;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  margin-bottom: 22px;
+  letter-spacing: 0.03em;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn:hover { background: #323232; border-color: #8db89a; }
+.btn.marked { background: #1e2b22; border-color: #8db89a; }
+.bdot { width: 8px; height: 8px; border-radius: 50%; background: #8db89a; flex-shrink: 0; }
+.month-row { display: flex; align-items: center; margin-bottom: 6px; }
+.month-label {
+  font-size: 10px;
+  color: #4a4a47;
+  letter-spacing: 0.05em;
+  width: 28px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+.month-label.current { color: #8db89a; }
+.dots { display: flex; gap: 3px; flex-wrap: nowrap; }
+.dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 2.5px;
+  background: #2a2a2a;
+  border: 0.5px solid #2f2f2c;
+  flex-shrink: 0;
+}
+.dot.read { background: #8db89a; border-color: #8db89a; }
+.dot.today { background: #2a2a2a; border: 0.5px solid #8db89a; }
+.dot.future { background: #1d1d1d; border-color: #252522; }
+.divider { border: none; border-top: 0.5px solid #2a2a2a; margin: 16px 0; }
+.stats-row { display: flex; gap: 0; }
+.stat { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.stat + .stat { border-left: 0.5px solid #2a2a2a; padding-left: 16px; }
+.stat-val { font-size: 18px; font-weight: 500; color: #e8e0d4; }
+.stat-label { font-size: 10px; color: #6a6460; letter-spacing: 0.04em; }
+.pages-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 0.5px solid #2a2a2a;
+}
+.pages-label { font-size: 11px; color: #6a6460; letter-spacing: 0.04em; }
+.pages-count {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  color: #8db89a;
+  line-height: 1;
+}
+.pages-sub { font-size: 10px; color: #4a4a47; letter-spacing: 0.04em; margin-top: 2px; }
+.sync-status { font-size: 9px; color: #3a3a38; letter-spacing: 0.04em; margin-top: 10px; text-align: right; }
+</style>
+</head>
+<body>
+<div class="w">
+  <p class="wtitle">read</p>
+  <p class="wsub">at least 1 page today</p>
+
+  <button class="btn" id="readBtn" onclick="toggleRead()">
+    <span class="bdot"></span>
+    <span id="btnLabel">mark today as read</span>
+  </button>
+
+  <div id="calGrid"></div>
+
+  <hr class="divider">
+
+  <div class="stats-row">
+    <div class="stat">
+      <span class="stat-val" id="streakVal">0</span>
+      <span class="stat-label">🔥 day streak</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val" id="totalVal">0</span>
+      <span class="stat-label">✦ days read</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val" id="monthVal">0</span>
+      <span class="stat-label">◎ this month</span>
+    </div>
+  </div>
+
+  <div class="pages-row">
+    <div>
+      <div class="pages-label">pages read</div>
+      <div class="pages-sub" id="pagesYear">2026</div>
+    </div>
+    <div class="pages-count" id="pagesVal">—</div>
+  </div>
+
+  <div class="sync-status" id="syncStatus"></div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────
+// Replace with your Notion integration token and database IDs after setup
+const NOTION_TOKEN = '';
+const READING_LOG_DB = 'cca8b3fcdbae446ead1008070b641cd4'; // Reading Log DB
+const BOOKS_DB = 'a0f13390125e4f09aff5e91d6cca8a31';       // Books DB
+// ────────────────────────────────────────────────────────────────────────
+
+const MONTH_NAMES = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const today = new Date();
+const year = today.getFullYear();
+const todayKey = today.toISOString().split('T')[0];
+const todayMonth = today.getMonth();
+
+function getKey(d) { return d.toISOString().split('T')[0]; }
+function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
+
+let readDays = {};   // { 'YYYY-MM-DD': true }
+let pagesData = {};  // { 'YYYY-MM-DD': pagesCount }
+let todayMarked = false;
+let useNotion = !!NOTION_TOKEN;
+
+// ── LOCAL STORAGE FALLBACK ───────────────────────────────────────────────
+function saveLocal() {
+  localStorage.setItem('readDays_' + year, JSON.stringify(readDays));
+  localStorage.setItem('pagesData_' + year, JSON.stringify(pagesData));
+}
+function loadLocal() {
+  try {
+    readDays = JSON.parse(localStorage.getItem('readDays_' + year) || '{}');
+    pagesData = JSON.parse(localStorage.getItem('pagesData_' + year) || '{}');
+    if (readDays[todayKey]) todayMarked = true;
+  } catch(e) { readDays = {}; pagesData = {}; }
+}
+
+// ── NOTION SYNC ──────────────────────────────────────────────────────────
+async function notionQuery(dbId, filter) {
+  const res = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + NOTION_TOKEN,
+      'Notion-Version': '2022-06-28',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ filter, page_size: 365 })
+  });
+  return res.json();
+}
+
+async function notionCreate(dbId, props) {
+  const res = await fetch('https://api.notion.com/v1/pages', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + NOTION_TOKEN,
+      'Notion-Version': '2022-06-28',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      parent: { database_id: dbId },
+      properties: props
+    })
+  });
+  return res.json();
+}
+
+async function loadFromNotion() {
+  try {
+    setSyncStatus('syncing...');
+    const yearStart = year + '-01-01';
+    const yearEnd = year + '-12-31';
+
+    // Load reading log
+    const logData = await notionQuery(READING_LOG_DB, {
+      and: [
+        { property: 'Date', date: { on_or_after: yearStart } },
+        { property: 'Date', date: { on_or_before: yearEnd } }
+      ]
+    });
+
+    readDays = {};
+    pagesData = {};
+    if (logData.results) {
+      for (const page of logData.results) {
+        const dateVal = page.properties['Date']?.date?.start;
+        const pagesVal = page.properties['Pages Read']?.number || 0;
+        if (dateVal) {
+          if (pagesVal > 0) readDays[dateVal] = true;
+          pagesData[dateVal] = pagesVal;
+        }
+      }
+    }
+
+    if (readDays[todayKey]) todayMarked = true;
+    saveLocal();
+    setSyncStatus('synced ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}));
+  } catch(e) {
+    setSyncStatus('offline — using local data');
+  }
+}
+
+async function logTodayToNotion(pages) {
+  try {
+    await notionCreate(READING_LOG_DB, {
+      'Name': { title: [{ text: { content: todayKey } }] },
+      'Date': { date: { start: todayKey } },
+      'Pages Read': { number: pages }
+    });
+  } catch(e) { console.error('Notion write failed', e); }
+}
+
+async function loadPagesFromNotion() {
+  try {
+    const yearStart = year + '-01-01';
+    const data = await notionQuery(BOOKS_DB, {
+      and: [
+        { property: 'Status', select: { equals: 'Finished' } },
+        { property: 'Date Finished', date: { on_or_after: yearStart } }
+      ]
+    });
+    // Sum pages from finished books
+    let total = 0;
+    if (data.results) {
+      for (const page of data.results) {
+        total += page.properties['Pages']?.number || 0;
+      }
+    }
+    if (total > 0) document.getElementById('pagesVal').textContent = total.toLocaleString();
+  } catch(e) {}
+}
+
+function setSyncStatus(msg) {
+  document.getElementById('syncStatus').textContent = msg;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function buildGrid() {
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  for (let m = 0; m <= 11; m++) {
+    const days = daysInMonth(year, m);
+    const row = document.createElement('div');
+    row.className = 'month-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'month-label' + (m === todayMonth ? ' current' : '');
+    lbl.textContent = MONTH_NAMES[m];
+    row.appendChild(lbl);
+    const dotsWrap = document.createElement('div');
+    dotsWrap.className = 'dots';
+    for (let d = 1; d <= days; d++) {
+      const key = getKey(new Date(year, m, d));
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      if (key < todayKey) { if (readDays[key]) dot.classList.add('read'); }
+      else if (key === todayKey) { dot.classList.add(readDays[key] ? 'read' : 'today'); }
+      else { dot.classList.add('future'); }
+      dotsWrap.appendChild(dot);
+    }
+    row.appendChild(dotsWrap);
+    grid.appendChild(row);
+  }
+}
+
+function calcStats() {
+  let streak = 0, total = 0, thisMonth = 0;
+  const monthKey = today.toISOString().slice(0, 7);
+  for (let m = 0; m <= todayMonth; m++) {
+    for (let d = 1; d <= daysInMonth(year, m); d++) {
+      const key = getKey(new Date(year, m, d));
+      if (key > todayKey) break;
+      if (readDays[key]) { total++; if (key.startsWith(monthKey)) thisMonth++; }
+    }
+  }
+  let d = new Date(today);
+  while (readDays[getKey(d)]) { streak++; d.setDate(d.getDate() - 1); }
+  document.getElementById('streakVal').textContent = streak;
+  document.getElementById('totalVal').textContent = total;
+  document.getElementById('monthVal').textContent = thisMonth;
+  document.getElementById('pagesYear').textContent = year;
+
+  // Pages from reading log (sum all entries)
+  const totalPages = Object.values(pagesData).reduce((a, b) => a + b, 0);
+  if (totalPages > 0) document.getElementById('pagesVal').textContent = totalPages.toLocaleString();
+}
+
+// ── MARK TODAY ────────────────────────────────────────────────────────────
+async function toggleRead() {
+  todayMarked = !todayMarked;
+  if (todayMarked) {
+    readDays[todayKey] = true;
+    // Default 1 page if no pages logged yet — user can update in Notion
+    if (!pagesData[todayKey]) pagesData[todayKey] = 1;
+    document.getElementById('btnLabel').textContent = 'read today ✓';
+    document.getElementById('readBtn').classList.add('marked');
+    if (useNotion) await logTodayToNotion(pagesData[todayKey]);
+  } else {
+    delete readDays[todayKey];
+    document.getElementById('btnLabel').textContent = 'mark today as read';
+    document.getElementById('readBtn').classList.remove('marked');
+  }
+  saveLocal();
+  buildGrid();
+  calcStats();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+async function init() {
+  loadLocal();
+  buildGrid();
+  calcStats();
+  if (todayMarked) {
+    document.getElementById('btnLabel').textContent = 'read today ✓';
+    document.getElementById('readBtn').classList.add('marked');
+  }
+  if (useNotion) {
+    await loadFromNotion();
+    await loadPagesFromNotion();
+    buildGrid();
+    calcStats();
+  } else {
+    setSyncStatus('add notion token to enable sync');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
