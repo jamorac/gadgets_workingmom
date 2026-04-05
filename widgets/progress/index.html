@@ -8,6 +8,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 .w { color: #e4dfd8; padding: 4px 2px; }
+.w-inner { max-width: 480px; margin: 0 auto; }
 .sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #4e4a46; font-weight: 500; margin-bottom: 12px; }
 .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
 .week-day { display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -23,36 +24,51 @@ html, body { margin: 0; padding: 0; width: 100%; overflow: hidden; font-family: 
 .summary-tag { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
 .summary-tag.m { color: #5a4030; }
 .summary-tag.n { color: #42386a; }
+.yearly-toggle { display: grid; grid-template-columns: 52px 1fr 1fr; align-items: center; margin-bottom: 4px; cursor: pointer; user-select: none; }
+.toggle-label { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #3a3836; display: flex; align-items: center; gap: 5px; }
+.arrow { font-size: 9px; color: #4e4a46; transition: transform 0.2s; display: inline-block; }
+.arrow.open { transform: rotate(90deg); }
+.yearly-content { overflow: hidden; transition: max-height 0.25s ease, opacity 0.2s ease; max-height: 0; opacity: 0; }
+.yearly-content.expanded { max-height: 60px; opacity: 1; }
 </style>
 </head>
 <body>
 <div class="w">
-  <p class="sec-label">this week's progress</p>
-  <div class="week-grid" id="week-grid"></div>
+  <div class="w-inner">
+    <p class="sec-label">this week's progress</p>
+    <div class="week-grid" id="week-grid"></div>
 
-  <div class="divider"></div>
+    <div class="divider"></div>
 
-  <div id="summary-section">
-    <div class="summary-row">
-      <span class="summary-period">monthly</span>
-      <div class="summary-cell">
-        <span class="summary-num m" id="m-morning">0</span>
-        <span class="summary-tag m">morning</span>
+    <div id="summary-section">
+      <div class="summary-row">
+        <span class="summary-period">monthly</span>
+        <div class="summary-cell">
+          <span class="summary-num m" id="m-morning">0</span>
+          <span class="summary-tag m">morning</span>
+        </div>
+        <div class="summary-cell">
+          <span class="summary-num n" id="m-night">0</span>
+          <span class="summary-tag n">night</span>
+        </div>
       </div>
-      <div class="summary-cell">
-        <span class="summary-num n" id="m-night">0</span>
-        <span class="summary-tag n">night</span>
+
+      <div class="yearly-toggle" onclick="toggleYearly()">
+        <span class="toggle-label"><span class="arrow" id="yarrow">&#9658;</span> yearly</span>
+        <div></div><div></div>
       </div>
-    </div>
-    <div class="summary-row">
-      <span class="summary-period">yearly</span>
-      <div class="summary-cell">
-        <span class="summary-num m" id="y-morning">0</span>
-        <span class="summary-tag m">morning</span>
-      </div>
-      <div class="summary-cell">
-        <span class="summary-num n" id="y-night">0</span>
-        <span class="summary-tag n">night</span>
+      <div class="yearly-content" id="ycontent">
+        <div class="summary-row" style="margin-top:6px;">
+          <span class="summary-period"></span>
+          <div class="summary-cell">
+            <span class="summary-num m" id="y-morning">0</span>
+            <span class="summary-tag m">morning</span>
+          </div>
+          <div class="summary-cell">
+            <span class="summary-num n" id="y-night">0</span>
+            <span class="summary-tag n">night</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -67,6 +83,19 @@ function setBackground() {
 }
 if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addListener(setBackground);
 setBackground();
+
+function toggleYearly() {
+  const content = document.getElementById('ycontent');
+  const arrow = document.getElementById('yarrow');
+  const isOpen = content.classList.contains('expanded');
+  if (isOpen) {
+    content.classList.remove('expanded');
+    arrow.classList.remove('open');
+  } else {
+    content.classList.add('expanded');
+    arrow.classList.add('open');
+  }
+}
 
 const TODAY = new Date().toDateString();
 const DAYS = ['sun','mon','tue','wed','thu','fri','sat'];
